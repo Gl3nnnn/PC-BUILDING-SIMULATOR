@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#060912">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Build your dream PC part by part with live compatibility checks, Philippine peso pricing, a 3D visualizer, FPS estimates, saved builds, and shareable configurations.">
+  <title>PC Building Simulator · PC Build Studio</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.min.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#app">Skip to main content</a>
+  <div class="app-bg" aria-hidden="true">
+    <div class="app-bg-grid"></div>
+    <div class="app-bg-orb app-bg-orb--one"></div>
+    <div class="app-bg-orb app-bg-orb--two"></div>
+    <div class="app-bg-orb app-bg-orb--three"></div>
+  </div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#/home" aria-label="PC Build Studio home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none" role="presentation">
+            <rect x="7" y="5" width="26" height="30" rx="6" stroke="currentColor" stroke-width="2.2"/>
+            <path d="M14 5v30" stroke="currentColor" stroke-width="1.6" opacity=".55"/>
+            <circle cx="24" cy="13" r="2.2" fill="currentColor"/>
+            <path d="M21 22h7M21 27h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M14 15h4M14 20h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong>PC Build</strong>
+          <span>Studio</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+        <a class="nav-link" href="#/builder" data-nav="builder">Builder</a>
+        <a class="nav-link" href="#/database" data-nav="database">Hardware</a>
+        <a class="nav-link" href="#/visualizer" data-nav="visualizer">3D View</a>
+        <a class="nav-link" href="#/performance" data-nav="performance">Performance</a>
+        <a class="nav-link" href="#/compatibility" data-nav="compatibility">Compatibility</a>
+        <a class="nav-link" href="#/saved" data-nav="saved">
+          Saved
+          <span class="nav-count" id="nav-saved-count" hidden>0</span>
+        </a>
+        <a class="nav-link" href="#/about" data-nav="about">About</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="header-build-pill" href="#/builder" id="header-build-pill" aria-label="View your current build total">
+          <span class="header-pill-label">Your build</span>
+          <span class="header-pill-value">
+            <span id="header-build-count">0 parts</span>
+            <strong id="header-build-total">₱0</strong>
+          </span>
+        </a>
+        <button class="icon-btn nav-toggle" type="button" data-action="toggle-menu" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle navigation menu">
+          <svg class="icon nav-icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg class="icon nav-icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" class="app-main" tabindex="-1"></main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a class="brand brand--footer" href="#/home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none" role="presentation">
+              <rect x="7" y="5" width="26" height="30" rx="6" stroke="currentColor" stroke-width="2.2"/>
+              <path d="M14 5v30" stroke="currentColor" stroke-width="1.6" opacity=".55"/>
+              <circle cx="24" cy="13" r="2.2" fill="currentColor"/>
+              <path d="M21 22h7M21 27h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="brand-text"><strong>PC Build</strong><span>Studio</span></span>
+        </a>
+        <p>A local-first PC configurator with live compatibility checks, 3D previews, and Philippine peso estimates. No account, no backend, no tracking.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Plan</h3>
+        <a href="#/builder">PC Builder</a>
+        <a href="#/database">Hardware Database</a>
+        <a href="#/compatibility">Compatibility Checker</a>
+      </div>
+      <div class="footer-col">
+        <h3>Explore</h3>
+        <a href="#/visualizer">3D Visualizer</a>
+        <a href="#/performance">FPS Estimator</a>
+        <a href="#/saved">Saved Builds</a>
+      </div>
+      <div class="footer-col">
+        <h3>Project</h3>
+        <a href="#/about">About & FAQ</a>
+        <a href="#/about">Data disclaimer</a>
+        <a href="#/builder">Start building</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© <span id="footer-year">2026</span> PC Build Studio. Sample data for demonstration only — prices and availability are estimates, not retailer quotes.</p>
+      <p>Three.js © three.js authors · MIT license</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
