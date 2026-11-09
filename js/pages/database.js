@@ -1,6 +1,7 @@
 import { CATEGORIES, HARDWARE, itemsByCategory, BRANDS } from '../data/hardware.js';
 import { store, on } from '../core/store.js';
 import { getIds } from '../core/build.js';
+import { priceSnapshotSummary } from '../core/prices.js';
 import { escapeHtml } from '../core/format.js';
 import { icon } from '../ui/icons.js';
 import { productCard, syncCompareButtons, syncProductButtons } from '../ui/product.js';
@@ -30,12 +31,14 @@ function matchesQuery(item, query) {
 
 export function render(root, context = {}) {
   const requested = context.params?.get('category');
+  const requestedSort = context.params?.get('sort');
+  const requestedStock = context.params?.get('stock');
   const state = {
     category: CATEGORIES.some((category) => category.id === requested) ? requested : 'all',
-    search: '',
-    sort: 'recommended',
-    brand: 'all',
-    stock: 'all',
+    search: context.params?.get('q') || '',
+    sort: SORTS.some((sort) => sort.id === requestedSort) ? requestedSort : 'recommended',
+    brand: context.params?.get('brand') || 'all',
+    stock: STOCK_OPTIONS.some((stock) => stock.id === requestedStock) ? requestedStock : 'all',
   };
 
   root.innerHTML = `
@@ -44,7 +47,7 @@ export function render(root, context = {}) {
         <div>
           <p class="eyebrow">Specs, prices & availability</p>
           <h1 class="page-title">Hardware Database</h1>
-          <p class="page-subtitle">${HARDWARE.length} realistic sample components across nine categories. Prices are estimates in Philippine pesos.</p>
+          <p class="page-subtitle">${HARDWARE.length} realistic sample components across nine categories. ${escapeHtml(priceSnapshotSummary())}.</p>
         </div>
         <div class="page-actions">
           <a class="btn btn--primary" href="#/builder">${icon('wrench', 16)}<span>Open builder</span></a>
@@ -54,7 +57,7 @@ export function render(root, context = {}) {
       <div class="db-toolbar">
         <label class="search-field search-field--lg">
           <span class="search-icon">${icon('search', 17)}</span>
-          <input id="db-search" type="search" placeholder="Search 100 components by name, brand, socket, chipset, specs…" autocomplete="off" aria-label="Search hardware database">
+          <input id="db-search" type="search" placeholder="Search ${HARDWARE.length} components by name, brand, socket, chipset, specs…" autocomplete="off" aria-label="Search hardware database">
         </label>
         <div class="tool-selects">
           <label class="mini-select">
@@ -145,6 +148,16 @@ export function render(root, context = {}) {
     `;
   }
 
+  function syncUrl() {
+    const params = new URLSearchParams();
+    if (state.category !== 'all') params.set('category', state.category);
+    if (state.search.trim()) params.set('q', state.search.trim());
+    if (state.sort !== 'recommended') params.set('sort', state.sort);
+    if (state.brand !== 'all') params.set('brand', state.brand);
+    if (state.stock !== 'all') params.set('stock', state.stock);
+    history.replaceState(null, '', params.toString() ? `#/database?${params.toString()}` : '#/database');
+  }
+
   function clearFilters() {
     state.search = '';
     state.brand = 'all';
@@ -153,6 +166,7 @@ export function render(root, context = {}) {
     brandSelect.value = 'all';
     stockSelect.value = 'all';
     renderGrid();
+    syncUrl();
   }
 
   page.addEventListener('click', (event) => {
@@ -165,7 +179,7 @@ export function render(root, context = {}) {
       }
       renderCategories();
       renderGrid();
-      history.replaceState(null, '', state.category === 'all' ? '#/database' : `#/database?category=${state.category}`);
+      syncUrl();
       return;
     }
     if (event.target.closest('[data-db-clear]')) {
@@ -176,22 +190,33 @@ export function render(root, context = {}) {
   searchInput.addEventListener('input', () => {
     state.search = searchInput.value;
     renderGrid();
+    syncUrl();
   });
   sortSelect.addEventListener('change', () => {
     state.sort = sortSelect.value;
     renderGrid();
+    syncUrl();
   });
   brandSelect.addEventListener('change', () => {
     state.brand = brandSelect.value;
     renderGrid();
+    syncUrl();
   });
   stockSelect.addEventListener('change', () => {
     state.stock = stockSelect.value;
     renderGrid();
+    syncUrl();
   });
+
+  if (state.brand !== 'all' && !BRANDS.includes(state.brand)) state.brand = 'all';
+  searchInput.value = state.search;
+  sortSelect.value = state.sort;
+  brandSelect.value = state.brand;
+  stockSelect.value = state.stock;
 
   renderCategories();
   renderGrid();
+  syncUrl();
 
   const unsubBuild = on('build', () => syncProductButtons(root, store.getCurrent()));
   const onCompare = (event) => syncCompareButtons(root, event.detail.ids);

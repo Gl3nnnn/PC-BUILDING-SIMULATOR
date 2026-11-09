@@ -1,6 +1,7 @@
 import { PRESETS, PRESETS_BY_ID } from './data/presets.js';
 import { getHardware } from './data/hardware.js';
 import { store, on } from './core/store.js';
+import { loadPrices } from './core/prices.js';
 import { buildFromFile, buildTotal, decodeBuild, getIds, sanitizeBuild, selectedCount } from './core/build.js';
 import { evaluateBuild } from './core/compat.js';
 import { escapeHtml, peso } from './core/format.js';
@@ -11,6 +12,8 @@ import { closeModal, confirmDialog, openModal } from './ui/modal.js';
 import { toast } from './ui/toast.js';
 import { componentDetailsHTML, syncCompareButtons, syncProductButtons } from './ui/product.js';
 import { buildRowsHTML, buildStatsHTML, statusBadge } from './ui/summary.js';
+import { openCommandPalette, openShortcutsDialog } from './ui/command.js';
+import { openBuildWizard } from './ui/wizard.js';
 import { presetCard, presetDetailsHTML } from './ui/preset.js';
 import { render as renderHome } from './pages/home.js';
 import { render as renderBuilder } from './pages/builder.js';
@@ -19,6 +22,7 @@ import { render as renderCompatibility } from './pages/compatibility.js';
 import { render as renderPerformance } from './pages/performance.js';
 import { render as renderVisualizer } from './pages/visualizer.js';
 import { render as renderSaved } from './pages/saved.js';
+import { render as renderShowcase } from './pages/showcase.js';
 import { render as renderAbout } from './pages/about.js';
 
 const PAGES = {
@@ -29,6 +33,7 @@ const PAGES = {
   performance: { title: 'Performance Estimator', render: renderPerformance },
   visualizer: { title: '3D Visualizer', render: renderVisualizer },
   saved: { title: 'Saved Builds', render: renderSaved },
+  showcase: { title: 'Build Showcase', render: renderShowcase },
   about: { title: 'About', render: renderAbout },
 };
 
@@ -426,6 +431,15 @@ const actionHandlers = {
   'reload-app'() {
     location.reload();
   },
+  'open-command'() {
+    openCommandPalette();
+  },
+  'open-wizard'() {
+    openBuildWizard();
+  },
+  'open-shortcuts'() {
+    openShortcutsDialog();
+  },
   'open-presets'() {
     openPresetsDialog();
   },
@@ -578,6 +592,57 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && menuOpen) setMenu(false);
 });
 
+let goPrefixAt = 0;
+const isTypingTarget = () => {
+  const element = document.activeElement;
+  return Boolean(element && (
+    element.isContentEditable
+    || ['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName)
+  ));
+};
+
+document.addEventListener('keydown', (event) => {
+  if (event.isComposing) return;
+  const modifier = event.ctrlKey || event.metaKey;
+  if (modifier && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    openCommandPalette();
+    return;
+  }
+  if (modifier && event.key.toLowerCase() === 's' && !document.body.classList.contains('has-modal')) {
+    event.preventDefault();
+    actionHandlers['save-build']();
+    return;
+  }
+  if (isTypingTarget() || document.body.classList.contains('has-modal')) return;
+  if (event.key === '?') {
+    event.preventDefault();
+    openShortcutsDialog();
+    return;
+  }
+  if (event.key.toLowerCase() === 'g') {
+    goPrefixAt = Date.now();
+    return;
+  }
+  if (goPrefixAt && Date.now() - goPrefixAt < 1200) {
+    const destinations = {
+      h: '#/home',
+      b: '#/builder',
+      d: '#/database',
+      v: '#/visualizer',
+      p: '#/performance',
+      c: '#/compatibility',
+      s: '#/saved',
+    };
+    const destination = destinations[event.key.toLowerCase()];
+    goPrefixAt = 0;
+    if (destination) {
+      event.preventDefault();
+      location.hash = destination;
+    }
+  }
+});
+
 document.addEventListener('compare:changed', (event) => {
   syncCompareButtons(document, event.detail?.ids || []);
 });
@@ -594,5 +659,14 @@ if (!location.hash || location.hash === '#') {
 const yearEl = document.querySelector('#footer-year');
 if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
+await loadPrices();
 compare.init();
 renderRoute();
+
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((error) => {
+      console.warn('Offline cache registration failed.', error);
+    });
+  });
+}

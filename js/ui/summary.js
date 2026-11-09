@@ -1,6 +1,8 @@
 import { CATEGORIES } from '../data/hardware.js';
 import { buildTotal, getItems } from '../core/build.js';
 import { COMPATIBILITY_LABELS } from '../core/compat.js';
+import { getPriceState } from '../core/prices.js';
+import { analyzeBuild } from '../core/intelligence.js';
 import { escapeHtml, peso } from '../core/format.js';
 import { icon } from './icons.js';
 
@@ -92,13 +94,54 @@ export function buildStatsHTML(result) {
   `;
 }
 
+export function buildIntelligenceHTML(build, options = {}) {
+  const intel = analyzeBuild(build, {
+    resolution: options.resolution || '1080p',
+    quality: options.quality || 'ultra',
+  });
+  return intelligenceCardsHTML(intel);
+}
+
+export function intelligenceCardsHTML(intel) {
+  if (!intel.averageFps && !intel.psuWattage) return '';
+  const cards = [];
+  if (intel.bottleneck) {
+    cards.push(`
+      <div class="intel-card intel-card--bottleneck">
+        <span class="intel-label">${icon('chart', 13)} Bottleneck</span>
+        <strong>${escapeHtml(intel.bottleneck.label)}</strong>
+        <p>${escapeHtml(intel.bottleneck.detail)}</p>
+      </div>
+    `);
+  }
+  if (intel.costPerFrame) {
+    cards.push(`
+      <div class="intel-card">
+        <span class="intel-label">${icon('money', 13)} Cost per frame</span>
+        <strong>${peso(intel.costPerFrame)}<small>/fps</small></strong>
+        <p>${intel.value ? escapeHtml(intel.value.label) : 'Based on selected resolution'} at ${escapeHtml(intel.performance.resolution.label)} ${escapeHtml(intel.performance.quality.label.toLowerCase())}.</p>
+      </div>
+    `);
+  }
+  if (intel.psuWattage) {
+    cards.push(`
+      <div class="intel-card">
+        <span class="intel-label">${icon('bolt', 13)} PSU load</span>
+        <strong>${intel.psuUtilization}%</strong>
+        <p>${intel.headroom >= 0 ? `${intel.headroom} W headroom above the estimated ${intel.power} W peak.` : `${Math.abs(intel.headroom)} W above the PSU rating — reduce load or upgrade.`}</p>
+      </div>
+    `);
+  }
+  return `<div class="intel-strip">${cards.join('')}</div>`;
+}
+
 export function totalsHTML(build) {
   const total = buildTotal(build);
   return `
     <div class="totals-row">
       <div>
         <span class="totals-label">Estimated total</span>
-        <span class="totals-note">Sample prices · PHP</span>
+        <span class="totals-note">${getPriceState().meta.source === 'feed' ? 'Live feed prices · PHP' : 'Sample prices · PHP'}</span>
       </div>
       <strong class="totals-value">${peso(total)}</strong>
     </div>

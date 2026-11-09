@@ -2,11 +2,12 @@ import { CATEGORIES, itemsByCategory, categoryMeta } from '../data/hardware.js';
 import { store, on } from '../core/store.js';
 import { buildTotal, coreProgress, getIds, getItems, selectedCount } from '../core/build.js';
 import { evaluateBuild } from '../core/compat.js';
+import { priceSnapshotSummary } from '../core/prices.js';
 import { escapeHtml, peso } from '../core/format.js';
 import { icon } from '../ui/icons.js';
 import { productCard } from '../ui/product.js';
 import { compare } from '../ui/compare.js';
-import { statusBadge, buildRowsHTML, budgetHTML, buildStatsHTML, totalsHTML } from '../ui/summary.js';
+import { statusBadge, buildRowsHTML, budgetHTML, buildStatsHTML, buildIntelligenceHTML, totalsHTML } from '../ui/summary.js';
 import { emptyState, progressBar } from '../ui/common.js';
 
 const CATEGORY_HINTS = {
@@ -43,12 +44,14 @@ function searchText(item) {
 
 export function render(root, context = {}) {
   const initialCategory = context.params?.get('cat');
+  const initialSort = context.params?.get('sort');
+  const initialStock = context.params?.get('stock');
   const state = {
     category: CATEGORIES.some((category) => category.id === initialCategory) ? initialCategory : 'cpu',
-    search: '',
-    sort: 'recommended',
-    brand: 'all',
-    stock: 'all',
+    search: context.params?.get('q') || '',
+    sort: SORTS.some((sort) => sort.id === initialSort) ? initialSort : 'recommended',
+    brand: context.params?.get('brand') || 'all',
+    stock: STOCK_OPTIONS.some((stock) => stock.id === initialStock) ? initialStock : 'all',
   };
 
   root.innerHTML = `
@@ -60,7 +63,8 @@ export function render(root, context = {}) {
           <p class="page-subtitle">Assemble your parts. Compatibility, price, and power draw update instantly.</p>
         </div>
         <div class="builder-top-actions">
-          <button class="btn btn--ghost" type="button" data-action="open-presets">${icon('sparkles', 16)}<span>Presets</span></button>
+          <button class="btn btn--ghost" type="button" data-action="open-wizard">${icon('sparkles', 16)}<span>Guided setup</span></button>
+          <button class="btn btn--ghost" type="button" data-action="open-presets">${icon('grid', 16)}<span>Presets</span></button>
           <button class="btn btn--primary" type="button" data-action="save-build">${icon('save', 16)}<span>Save build</span></button>
         </div>
       </div>
@@ -264,6 +268,7 @@ export function render(root, context = {}) {
         <span class="summary-issue-count">${result.errors.length} issue${result.errors.length === 1 ? '' : 's'} · ${result.warnings.length} warning${result.warnings.length === 1 ? '' : 's'}</span>
       </div>
       ${buildStatsHTML(result)}
+      ${buildIntelligenceHTML(build)}
       ${budgetHTML(build)}
       <div class="summary-list-head">
         <span>Selected components</span>
@@ -282,7 +287,7 @@ export function render(root, context = {}) {
         <a href="#/compatibility">${icon('shield', 13)} Full compatibility report</a>
         <a href="#/visualizer">${icon('cube', 13)} 3D preview</a>
       </div>
-      <p class="summary-disclaimer">Prices are estimated sample values in Philippine pesos · Not live retailer quotes.</p>
+      <p class="summary-disclaimer">${escapeHtml(priceSnapshotSummary())} · Confirm final prices with the retailer.</p>
     `;
   }
 
@@ -311,6 +316,15 @@ export function render(root, context = {}) {
     renderFilterLine();
   }
 
+  function syncUrl() {
+    const params = new URLSearchParams({ cat: state.category });
+    if (state.search.trim()) params.set('q', state.search.trim());
+    if (state.sort !== 'recommended') params.set('sort', state.sort);
+    if (state.brand !== 'all') params.set('brand', state.brand);
+    if (state.stock !== 'all') params.set('stock', state.stock);
+    history.replaceState(null, '', `#/builder?${params.toString()}`);
+  }
+
   function setCategory(categoryId, options = {}) {
     if (!CATEGORIES.some((category) => category.id === categoryId)) return;
     state.category = categoryId;
@@ -326,7 +340,7 @@ export function render(root, context = {}) {
     renderCatalogHead();
     renderGrid();
     renderFilterLine();
-    history.replaceState(null, '', `#/builder?cat=${categoryId}`);
+    syncUrl();
     if (options.scroll) {
       page.querySelector('.catalog-tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -342,6 +356,7 @@ export function render(root, context = {}) {
     renderGrid();
     renderCatalogHead();
     renderFilterLine();
+    syncUrl();
   }
 
   page.addEventListener('click', (event) => {
@@ -365,6 +380,7 @@ export function render(root, context = {}) {
     renderGrid();
     renderCatalogHead();
     renderFilterLine();
+    syncUrl();
   });
 
   page.addEventListener('change', (event) => {
@@ -372,16 +388,19 @@ export function render(root, context = {}) {
     if (target.id === 'sort-select') {
       state.sort = target.value;
       renderGrid();
+      syncUrl();
     } else if (target.id === 'brand-select') {
       state.brand = target.value;
       renderGrid();
       renderCatalogHead();
       renderFilterLine();
+      syncUrl();
     } else if (target.id === 'stock-select') {
       state.stock = target.value;
       renderGrid();
       renderCatalogHead();
       renderFilterLine();
+      syncUrl();
     } else if (target.matches('[data-budget-input]')) {
       const value = target.value === '' ? null : Number(target.value);
       if (value !== null && (!Number.isFinite(value) || value < 0)) return;
@@ -390,8 +409,14 @@ export function render(root, context = {}) {
   });
 
   renderBrandOptions();
+  if (state.brand !== 'all' && !categoryBrands().includes(state.brand)) state.brand = 'all';
+  brandSelect.value = state.brand;
+  sortSelect.value = state.sort;
+  stockSelect.value = state.stock;
+  searchInput.value = state.search;
   searchInput.placeholder = `Search ${category().label.toLowerCase()}, brands, specs…`;
   renderAll();
+  syncUrl();
 
   const unsubscribe = on('build', () => {
     renderSidebar();

@@ -119,7 +119,7 @@ export function createPCScene(container, options = {}) {
   const gl = testCanvas.getContext('webgl2') || testCanvas.getContext('webgl');
   if (!gl) throw new Error('WebGL is not available in this browser.');
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -142,11 +142,14 @@ export function createPCScene(container, options = {}) {
   const state = {
     autoRotate: options.autoRotate ?? true,
     rgb: options.rgb ?? true,
+    exploded: options.exploded ?? false,
+    explodeT: 0,
     dragging: false,
     lastInteraction: 0,
     disposed: false,
     accent: new THREE.Color(0x8b5cf6),
   };
+  const explodeParts = [];
 
   const view = {
     theta: 0.88,
@@ -324,7 +327,71 @@ export function createPCScene(container, options = {}) {
     return mesh;
   }
 
+  function createLabelSprite(text, color = 0x9fb0cc) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(5, 9, 16, 0.82)';
+    ctx.strokeStyle = `#${new THREE.Color(color).getHexString()}`;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(4, 4, 504, 120, 18);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#dbe6ff';
+    ctx.font = '600 42px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 256, 66);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+    }));
+    sprite.scale.set(0.42, 0.105, 1);
+    return sprite;
+  }
+
+  function addDimensionMark(parent, fromX, toX, y, z, color, label, opacity = 0.9) {
+    const points = [
+      new THREE.Vector3(fromX, y, z),
+      new THREE.Vector3(toX, y, z),
+    ];
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(points),
+      new THREE.LineBasicMaterial({ color, transparent: true, opacity }),
+    );
+    line.renderOrder = 2;
+    parent.add(line);
+    const tick = 0.018;
+    for (const x of [fromX, toX]) {
+      const tickLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(x, y - tick, z),
+          new THREE.Vector3(x, y + tick, z),
+        ]),
+        new THREE.LineBasicMaterial({ color, transparent: true, opacity }),
+      );
+      tickLine.renderOrder = 2;
+      parent.add(tickLine);
+    }
+    const sprite = createLabelSprite(label, color);
+    sprite.position.set((fromX + toX) / 2, y + 0.078, z);
+    parent.add(sprite);
+    return line;
+  }
+
+  function registerExplode(mesh, offset) {
+    explodeParts.push({ mesh, base: mesh.position.clone(), offset });
+    return mesh;
+  }
+
   function buildCase(pcCase) {
+    explodeParts.length = 0;
     const specs = pcCase?.specs || {};
     const accent = accentOf(pcCase, 0x8b5cf6);
     state.accent.copy(accent);
@@ -356,11 +423,13 @@ export function createPCScene(container, options = {}) {
     addBox(caseGroup, CASE_W, CASE_H, 0.024, 0, 0, -CASE_D / 2, panelMaterial);
     addBox(caseGroup, CASE_W, 0.028, CASE_D, 0, -CASE_H / 2, 0, frameMaterial);
     addBox(caseGroup, CASE_W, 0.028, CASE_D, 0, CASE_H / 2, 0, frameMaterial);
-    addBox(caseGroup, 0.024, CASE_H, CASE_D, -CASE_W / 2, 0, 0, panelMaterial);
+    const leftPanel = addBox(caseGroup, 0.024, CASE_H, CASE_D, -CASE_W / 2, 0, 0, panelMaterial);
+    registerExplode(leftPanel, new THREE.Vector3(-0.34, 0, 0));
 
     const glass = addBox(caseGroup, 0.009, CASE_H - 0.06, CASE_D - 0.06, CASE_W / 2, 0, 0, glassMaterial);
     glass.castShadow = false;
     glass.receiveShadow = false;
+    registerExplode(glass, new THREE.Vector3(0.4, 0, 0));
 
     const topStrip = addBox(caseGroup, CASE_W * 0.86, 0.008, 0.012, 0, CASE_H / 2 - 0.035, CASE_D / 2 - 0.05, accentMaterial);
     topStrip.castShadow = false;
@@ -369,9 +438,11 @@ export function createPCScene(container, options = {}) {
     if (frontPanel.includes('Glass')) {
       const front = addBox(caseGroup, CASE_W - 0.05, CASE_H - 0.12, 0.008, 0, 0, CASE_D / 2, glassMaterial);
       front.castShadow = false;
+      registerExplode(front, new THREE.Vector3(0, 0, 0.34));
     } else {
       const frontMaterial = new THREE.MeshStandardMaterial({ color: 0x090c13, metalness: 0.4, roughness: 0.68, transparent: true, opacity: 0.62 });
-      addBox(caseGroup, CASE_W - 0.05, CASE_H - 0.12, 0.02, 0, 0, CASE_D / 2, frontMaterial);
+      const front = addBox(caseGroup, CASE_W - 0.05, CASE_H - 0.12, 0.02, 0, 0, CASE_D / 2, frontMaterial);
+      registerExplode(front, new THREE.Vector3(0, 0, 0.34));
       const slatMaterial = new THREE.MeshStandardMaterial({ color: 0x1a2230, metalness: 0.5, roughness: 0.5 });
       for (let index = 0; index < 14; index += 1) {
         addBox(caseGroup, CASE_W - 0.09, 0.008, 0.006, 0, -CASE_H / 2 + 0.12 + index * 0.09, CASE_D / 2 + 0.012, slatMaterial).castShadow = false;
@@ -628,6 +699,19 @@ export function createPCScene(container, options = {}) {
       [0.24, -0.18, 0.0],
       [0.2, -0.45, -0.02],
     ], 0.014, 0x141a24);
+
+    const pcCase = getItems(build, 'case')[0];
+    const gpuLength = Number(gpu.specs.length) || 0;
+    const maxLength = Number(pcCase?.specs.maxGpuLength);
+    const fits = !Number.isFinite(maxLength) || gpuLength <= maxLength;
+    const measureColor = fits ? 0x6ee7b7 : 0xfb7185;
+    if (gpuLength > 0) {
+      addDimensionMark(partsGroup, -0.28, -0.28 + length, y - height / 2 - 0.025, z + depth / 2 + 0.02, measureColor, `${gpuLength} mm`);
+    }
+    if (Number.isFinite(maxLength)) {
+      const limitLength = Math.min(CASE_W - 0.1, maxLength * 0.00152);
+      addDimensionMark(partsGroup, -0.28, -0.28 + limitLength, y - height / 2 - 0.145, z + depth / 2 + 0.02, fits ? 0x64748b : 0xfb7185, `Case limit ${maxLength} mm`, fits ? 0.55 : 0.9);
+    }
   }
 
   function buildPsuAndStorage(build) {
@@ -826,6 +910,10 @@ export function createPCScene(container, options = {}) {
     view.radius += (view.targetRadius - view.radius) * 0.08;
     updateCamera();
     animateRgb(time);
+    state.explodeT += ((state.exploded ? 1 : 0) - state.explodeT) * 0.08;
+    for (const entry of explodeParts) {
+      entry.mesh.position.copy(entry.base).addScaledVector(entry.offset, state.explodeT);
+    }
     const pulse = 1 + Math.sin(time * 1.6) * 0.012;
     rootGroup.position.y = (PLATFORM_Y + (CASE_H * rootGroup.scale.y) / 2 + 0.035) * pulse;
     renderer.render(scene, camera);
@@ -844,6 +932,13 @@ export function createPCScene(container, options = {}) {
     },
     setRGB(enabled) {
       state.rgb = Boolean(enabled);
+    },
+    setExploded(enabled) {
+      state.exploded = Boolean(enabled);
+    },
+    snapshot() {
+      renderer.render(scene, camera);
+      return renderer.domElement.toDataURL('image/png');
     },
     resetView() {
       view.targetTheta = 0.88;

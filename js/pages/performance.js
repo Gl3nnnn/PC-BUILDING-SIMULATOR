@@ -2,9 +2,11 @@ import { getHardware, itemsByCategory } from '../data/hardware.js';
 import { store } from '../core/store.js';
 import { getItems } from '../core/build.js';
 import { estimatePerformance, performanceVerdict, RESOLUTIONS, QUALITY } from '../core/perf.js';
-import { escapeHtml } from '../core/format.js';
+import { analyzeBuild } from '../core/intelligence.js';
+import { escapeHtml, peso } from '../core/format.js';
 import { icon } from '../ui/icons.js';
 import { emptyState } from '../ui/common.js';
+import { intelligenceCardsHTML } from '../ui/summary.js';
 import { toast } from '../ui/toast.js';
 
 function cpuOptions(selected) {
@@ -26,6 +28,53 @@ function gpuOptions(selected, integratedAvailable) {
 
 function fpsBarWidth(fps) {
   return `${Math.max(2, Math.min(100, (fps / 240) * 100))}%`;
+}
+
+function upgradeCard(entry, kind) {
+  return `
+    <article class="upgrade-card">
+      <div class="upgrade-head">
+        <span class="badge badge--neutral">${escapeHtml(kind)}</span>
+        <strong>${escapeHtml(entry.item.name)}</strong>
+      </div>
+      <p>${escapeHtml(entry.reason || '')}</p>
+      <div class="upgrade-meta">
+        <span>${entry.deltaFps > 0 ? `+${entry.deltaFps} avg FPS` : 'Capacity / platform upgrade'}</span>
+        <span>${peso(entry.price)}</span>
+      </div>
+      <a class="mini-action" href="#/builder?cat=${escapeHtml(entry.item.category)}">${icon('plus', 12)}<span>Add from builder</span></a>
+    </article>
+  `;
+}
+
+function currentBuildIntelligence(state) {
+  const build = store.getCurrent();
+  const intel = analyzeBuild(build, { resolution: state.resolution, quality: state.quality });
+  if (!intel.averageFps && !intel.psuWattage) return '';
+  const upgrades = [
+    ...intel.upgrades.cpu.slice(0, 2).map((entry) => ({ entry, kind: 'CPU' })),
+    ...intel.upgrades.gpu.slice(0, 2).map((entry) => ({ entry, kind: 'GPU' })),
+    ...intel.upgrades.ram.slice(0, 1).map((entry) => ({ entry, kind: 'Memory' })),
+    ...intel.upgrades.storage.slice(0, 1).map((entry) => ({ entry, kind: 'Storage' })),
+  ].slice(0, 4);
+  return `
+    <section class="perf-intel">
+      <div class="games-head">
+        <h2>Build intelligence</h2>
+        <span>${icon('wrench', 13)} Your current builder · ${escapeHtml(intel.performance.resolution.label)} ${escapeHtml(intel.performance.quality.label.toLowerCase())}</span>
+      </div>
+      <p class="perf-intel-note">This analysis uses the parts currently in your builder, not the demo selectors above.</p>
+      ${intelligenceCardsHTML(intel)}
+      <div class="upgrade-head-row">
+        <h2>Upgrade path</h2>
+        <span>${icon('chart', 13)} Ranked by estimated FPS gain per peso</span>
+      </div>
+      ${upgrades.length
+        ? `<div class="upgrade-grid">${upgrades.map(({ entry, kind }) => upgradeCard(entry, kind)).join('')}</div>`
+        : `<p class="upgrade-empty">${icon('check', 14)} No obvious upgrade is needed within the current case and PSU constraints.</p>`}
+      ${intel.bottleneck ? `<p class="perf-footnote">${icon('info', 13)} ${escapeHtml(intel.bottleneck.detail)}</p>` : ''}
+    </section>
+  `;
 }
 
 function gameCard(game) {
@@ -213,6 +262,7 @@ export function render(root) {
       </div>
       <div class="games-grid">${result.games.map(gameCard).join('')}</div>
       <p class="perf-footnote">${icon('info', 13)} Estimates assume a healthy system with current drivers, adequate cooling, and no severe background load. Upscaling (DLSS/FSR/XeSS) and frame generation are excluded.</p>
+      ${currentBuildIntelligence(state)}
     `;
   }
 

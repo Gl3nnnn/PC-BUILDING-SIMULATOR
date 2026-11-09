@@ -5,6 +5,7 @@ import { uid } from './format.js';
 
 const CURRENT_KEY = 'pcbs.current.v1';
 const SAVED_KEY = 'pcbs.saved.v1';
+const RATINGS_KEY = 'pcbs.ratings.v1';
 const MAX_SAVED = 60;
 
 const listeners = new Map();
@@ -68,8 +69,19 @@ function loadSaved() {
     .slice(0, MAX_SAVED);
 }
 
+function loadRatings() {
+  const raw = readJSON(RATINGS_KEY);
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  return Object.fromEntries(
+    Object.entries(raw)
+      .filter(([, value]) => Number.isFinite(Number(value)) && Number(value) >= 1 && Number(value) <= 5)
+      .map(([id, value]) => [id, Math.round(Number(value))]),
+  );
+}
+
 let current = sanitizeBuild(readJSON(CURRENT_KEY) || emptyBuild(), 'Untitled Build');
 let saved = loadSaved();
+let ratings = loadRatings();
 
 if (current.sourceId && !saved.some((entry) => entry.id === current.sourceId)) {
   current.sourceId = null;
@@ -99,6 +111,17 @@ export const store = {
   },
   getSavedById(id) {
     return saved.find((entry) => entry.id === id) || null;
+  },
+  getPresetRating(id) {
+    return ratings[id] || 0;
+  },
+  ratePreset(id, value) {
+    const rating = Math.round(Number(value));
+    if (!Number.isFinite(rating) || rating < 1 || rating > 5) return false;
+    ratings = { ...ratings, [id]: rating };
+    writeJSON(RATINGS_KEY, ratings);
+    emit('ratings', { id, rating });
+    return true;
   },
   isStorageAvailable() {
     return storageAvailable;

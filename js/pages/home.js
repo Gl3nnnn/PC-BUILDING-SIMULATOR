@@ -67,6 +67,7 @@ export function render(root) {
           <p class="hero-sub">Choose real-world hardware, catch compatibility problems before you buy, preview your rig in 3D, and estimate gaming performance — all in one local-first studio.</p>
           <div class="hero-cta">
             <a class="btn btn--primary btn--lg" href="#/builder">${icon('wrench', 17)}<span>Start building</span>${icon('arrowRight', 16)}</a>
+            <button class="btn btn--ghost btn--lg" type="button" data-action="open-wizard">${icon('sparkles', 17)}<span>Guided setup</span></button>
             <a class="btn btn--ghost btn--lg" href="#/database">${icon('database', 17)}<span>Browse hardware</span></a>
           </div>
           <div class="hero-stats">

@@ -3,6 +3,30 @@ import { buildPowerDraw, buildTotal, coreProgress, getItems, recommendedPsu, sel
 
 const isKnown = (value) => value !== undefined && value !== null && value !== '' && !(Array.isArray(value) && value.length === 0);
 
+export function parseGpuPower(connectors, tdp = 0) {
+  const text = String(connectors || '').toLowerCase();
+  if (!text || text.includes('none') || text.includes('slot powered')) {
+    return { kind: 'none', count: 0, eightPinEquivalent: 0, label: 'No auxiliary power' };
+  }
+  if (text.includes('16-pin') || text.includes('12vhpwr') || text.includes('12v-2x6')) {
+    const power = Number(tdp) || 0;
+    return {
+      kind: '16pin',
+      count: 1,
+      eightPinEquivalent: power > 400 ? 4 : power > 300 ? 3 : 2,
+      label: '16-pin GPU connector',
+    };
+  }
+  const match = text.match(/(\d+)\s*[×x]\s*8-pin/);
+  const count = match ? Number(match[1]) : text.includes('8-pin') ? 1 : 0;
+  return { kind: '8pin', count, eightPinEquivalent: count, label: `${count}× 8-pin` };
+}
+
+function vrmPhaseCount(specs) {
+  const match = String(specs?.powerStages || '').match(/(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
 export const COMPATIBILITY_LABELS = {
   compatible: { label: 'Compatible', tone: 'ok', icon: 'check' },
   warning: { label: 'Warnings', tone: 'warn', icon: 'alert' },
@@ -63,6 +87,16 @@ export function evaluateBuild(build) {
 
     if (cpu.specs.bios && cpuSocket === boardSocket) {
       add('info', 'BIOS update may be required', cpu.specs.bios, ids(cpu, motherboard));
+    }
+
+    const phases = vrmPhaseCount(motherboard.specs);
+    const peakPower = Number(cpu.specs.peakPower);
+    if (Number.isFinite(phases) && Number.isFinite(peakPower) && peakPower >= 120) {
+      if ((peakPower >= 240 && phases < 14) || (peakPower >= 180 && phases < 10) || (peakPower >= 150 && phases < 8)) {
+        add('warn', 'Motherboard power delivery is modest for this CPU', `${motherboard.name} lists a ${motherboard.specs.powerStages} VRM, while ${cpu.name} can draw up to ${peakPower} W in boost. The pair will boot, but sustained all-core loads may throttle or run hot. A board with stronger VRM cooling is safer for this CPU.`, ids(cpu, motherboard));
+      } else if (peakPower >= 150) {
+        add('ok', 'Motherboard power delivery suits the CPU', `${motherboard.name} lists a ${motherboard.specs.powerStages} VRM, which is appropriate for ${cpu.name}'s ${peakPower} W maximum boost power.`, ids(cpu, motherboard));
+      }
     }
   }
 
@@ -176,14 +210,29 @@ export function evaluateBuild(build) {
   }
 
   if (gpu && psu) {
-    const connectors = gpu.specs.powerConnectors || '';
-    if (connectors.includes('16-pin')) {
+    const need = parseGpuPower(gpu.specs.powerConnectors, gpu.specs.tdp);
+    const available = Number(psu.specs.pcie8pin);
+    if (need.kind === '16pin') {
       if (psu.specs.twelveVHPWR === true) {
         add('ok', 'Native 16-pin GPU power available', `${psu.name} has a native 16-pin GPU connector for ${gpu.name}.`, ids(gpu, psu));
       } else if (psu.specs.twelveVHPWR === false) {
-        add('warn', 'GPU power adapter may be required', `${gpu.name} uses a 16-pin power connector, while ${psu.name} does not list a native 16-pin cable. Use the adapter supplied with the card and seat it fully.`, ids(gpu, psu));
+        if (Number.isFinite(available) && available < need.eightPinEquivalent) {
+          add('error', 'Not enough PSU cables for the GPU power adapter', `${gpu.name} needs a 16-pin connection, and ${psu.name} has no native 16-pin cable. The adapter requires about ${need.eightPinEquivalent}× 8-pin cables, but this PSU lists ${available}. Choose a native 16-pin PSU or a higher-capacity unit with more PCIe cables.`, ids(gpu, psu));
+        } else {
+          add('warn', 'GPU power adapter may be required', `${gpu.name} uses a 16-pin power connector, while ${psu.name} does not list a native 16-pin cable. Use the adapter supplied with the card, which uses about ${need.eightPinEquivalent}× 8-pin connections, and seat it fully.`, ids(gpu, psu));
+        }
       } else {
         unknown('GPU power connector compatibility', 'The PSU 16-pin support is not listed.', ids(gpu, psu));
+      }
+    } else if (need.kind === '8pin' && need.count > 0) {
+      if (Number.isFinite(available)) {
+        if (available < need.count) {
+          add('error', 'Not enough PCIe cables for the graphics card', `${gpu.name} needs ${need.count}× 8-pin PCIe connection${need.count === 1 ? '' : 's'}, but ${psu.name} lists only ${available}. Use the correct cables or choose a PSU with more PCIe outputs.`, ids(gpu, psu));
+        } else {
+          add('ok', 'PSU has the required GPU cables', `${psu.name} provides ${available}× 8-pin PCIe cable${available === 1 ? '' : 's'} for ${gpu.name}'s ${need.count}× 8-pin requirement.`, ids(gpu, psu));
+        }
+      } else {
+        unknown('GPU cable count', 'The number of PCIe 8-pin cables on the PSU is not listed.', ids(gpu, psu));
       }
     }
   }
@@ -374,6 +423,10 @@ export function evaluateBuild(build) {
     } else if (fans.some((fan) => !isKnown(fan.specs.size))) {
       unknown('Case fan size compatibility', 'A selected fan kit does not list its size.', [pcCase, ...fans].map((item) => item.id));
     }
+  }
+
+  if (pcCase && !fans.length && Number(pcCase.specs.includedFans) > 0) {
+    add('info', 'Case includes fans', `${pcCase.name} ships with ${pcCase.specs.includedFans} fan${Number(pcCase.specs.includedFans) === 1 ? '' : 's'}, so additional fan kits are optional.`, ids(pcCase));
   }
 
   if (!gpu && cpu) {

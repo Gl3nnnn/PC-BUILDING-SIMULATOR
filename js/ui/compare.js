@@ -1,6 +1,7 @@
 import { compareTableHTML } from './product.js';
 import { getHardware, categoryMeta } from '../data/hardware.js';
 import { escapeHtml } from '../core/format.js';
+import { priceSnapshotSummary } from '../core/prices.js';
 import { icon } from './icons.js';
 import { openModal } from './modal.js';
 import { toast } from './toast.js';
@@ -79,7 +80,7 @@ export function openCompareModal() {
   openModal({
     title: `Compare ${categoryName(items[0].category)}`,
     eyebrow: 'Side by side',
-    subtitle: 'Specifications, price, and availability from the sample hardware catalog.',
+    subtitle: `Specifications, price, and availability. ${priceSnapshotSummary()}.`,
     size: 'xl',
     body: compareTableHTML(items),
     footer: `<button class="btn btn--ghost" type="button" data-modal-close>Close comparison</button>`,

@@ -503,3 +503,140 @@
   flex-shrink: 0;
   margin-top: 1px;
 }
+
+.perf-intel {
+  margin-top: 26px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
+.perf-intel-note {
+  margin-top: -4px;
+  margin-bottom: 10px;
+  color: #6f7c96;
+  font-size: 9.5px;
+}
+
+.perf-intel .intel-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 0;
+}
+
+.perf-intel .intel-card {
+  padding: 15px;
+  border-radius: 13px;
+  background: linear-gradient(165deg, rgba(16, 23, 40, 0.55), rgba(8, 12, 21, 0.48));
+}
+
+.perf-intel .intel-card strong {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: -0.025em;
+}
+
+.perf-intel .intel-card p {
+  margin-top: 5px;
+  font-size: 9.5px;
+  line-height: 1.55;
+}
+
+.upgrade-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 22px 0 12px;
+}
+
+.upgrade-head-row h2 {
+  font-size: 19px;
+}
+
+.upgrade-head-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.upgrade-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.upgrade-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: linear-gradient(165deg, rgba(16, 23, 40, 0.55), rgba(8, 12, 21, 0.48));
+}
+
+.upgrade-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.upgrade-head .badge {
+  flex-shrink: 0;
+}
+
+.upgrade-head strong {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #e5eaf8;
+}
+
+.upgrade-card > p {
+  color: #7c89a2;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.upgrade-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 5px;
+  font-size: 9.5px;
+  color: #9aa8c1;
+}
+
+.upgrade-meta span:first-child {
+  color: #6ee7b7;
+  font-weight: 600;
+}
+
+.upgrade-card .mini-action {
+  align-self: flex-start;
+  margin-top: 1px;
+}
+
+.upgrade-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.05);
+  color: #8ba5a0;
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
+.upgrade-empty .icon {
+  flex-shrink: 0;
+  color: #34d399;
+  margin-top: 1px;
+}

@@ -30,7 +30,7 @@ jobs:
       - name: Stage static site
         run: |
           mkdir _site
-          cp -R index.html favicon.svg .nojekyll css js vendor _site/
+          cp -R index.html favicon.svg og-image.png manifest.webmanifest sw.js robots.txt sitemap.xml .nojekyll css js data icons vendor _site/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

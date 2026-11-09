@@ -6,12 +6,48 @@
   <meta name="theme-color" content="#060912">
   <meta name="color-scheme" content="dark">
   <meta name="description" content="Build your dream PC part by part with live compatibility checks, Philippine peso pricing, a 3D visualizer, FPS estimates, saved builds, and shareable configurations.">
+  <meta name="author" content="PC Build Studio">
+  <meta name="robots" content="index, follow">
+  <meta name="application-name" content="PC Build Studio">
   <title>PC Building Simulator · PC Build Studio</title>
+  <link rel="canonical" href="https://gl3nnnn.github.io/PC-BUILDING-SIMULATOR/">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PC Build Studio">
+  <meta property="og:title" content="PC Build Studio — PC Building Simulator">
+  <meta property="og:description" content="Plan a PC part by part with compatibility checks, Philippine peso pricing, 3D previews, FPS estimates, and shareable builds.">
+  <meta property="og:url" content="https://gl3nnnn.github.io/PC-BUILDING-SIMULATOR/">
+  <meta property="og:image" content="https://gl3nnnn.github.io/PC-BUILDING-SIMULATOR/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="PC Build Studio — build your dream PC part by part.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PC Build Studio — PC Building Simulator">
+  <meta name="twitter:description" content="Compatibility checks, PHP pricing, 3D previews, FPS estimates, and shareable PC builds.">
+  <meta name="twitter:image" content="https://gl3nnnn.github.io/PC-BUILDING-SIMULATOR/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "PC Build Studio",
+      "url": "https://gl3nnnn.github.io/PC-BUILDING-SIMULATOR/",
+      "description": "A local-first PC building configurator with compatibility checks, Philippine peso pricing, 3D previews, and FPS estimates.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript and WebGL for the 3D preview",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "PHP"
+      }
+    }
+  </script>
   <script type="importmap">
     {
       "imports": {
@@ -53,6 +89,7 @@
         <a class="nav-link" href="#/visualizer" data-nav="visualizer">3D View</a>
         <a class="nav-link" href="#/performance" data-nav="performance">Performance</a>
         <a class="nav-link" href="#/compatibility" data-nav="compatibility">Compatibility</a>
+        <a class="nav-link" href="#/showcase" data-nav="showcase">Showcase</a>
         <a class="nav-link" href="#/saved" data-nav="saved">
           Saved
           <span class="nav-count" id="nav-saved-count" hidden>0</span>
@@ -61,6 +98,9 @@
       </nav>
 
       <div class="header-actions">
+        <button class="icon-btn header-command-btn" type="button" data-action="open-command" aria-label="Search and commands" title="Search and commands (Ctrl+K)">
+          <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
         <a class="header-build-pill" href="#/builder" id="header-build-pill" aria-label="View your current build total">
           <span class="header-pill-label">Your build</span>
           <span class="header-pill-value">
@@ -104,6 +144,7 @@
         <h3>Explore</h3>
         <a href="#/visualizer">3D Visualizer</a>
         <a href="#/performance">FPS Estimator</a>
+        <a href="#/showcase">Build Showcase</a>
         <a href="#/saved">Saved Builds</a>
       </div>
       <div class="footer-col">
@@ -114,7 +155,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© <span id="footer-year">2026</span> PC Build Studio. Sample data for demonstration only — prices and availability are estimates, not retailer quotes.</p>
+      <p>© <span id="footer-year">2026</span> PC Build Studio. Prices and availability are estimates unless marked live — always confirm with your retailer.</p>
       <p>Three.js © three.js authors · MIT license</p>
     </div>
   </footer>

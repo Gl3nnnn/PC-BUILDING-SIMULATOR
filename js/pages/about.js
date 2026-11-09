@@ -8,13 +8,33 @@ const FEATURES = [
   { icon: 'cube', name: '3D Visualizer', text: 'A rotatable transparent case built with Three.js.', href: '#/visualizer' },
   { icon: 'gamepad', name: 'Performance', text: 'Estimated FPS across ten games, three resolutions, four quality levels.', href: '#/performance' },
   { icon: 'database', name: 'Hardware Database', text: 'One hundred sample products with detailed specifications.', href: '#/database' },
+  { icon: 'sparkles', name: 'Build Showcase', text: 'Curated complete builds with local-only ratings and one-click loading.', href: '#/showcase' },
   { icon: 'bookmark', name: 'Saved Builds', text: 'Rename, duplicate, delete, share, and export builds locally.', href: '#/saved' },
+];
+
+const GUIDES = [
+  {
+    title: 'Budgeting: where the peso should go',
+    text: 'For a gaming PC, spend the largest share on the graphics card, then the CPU, then a quality PSU and case. A rough starting point is 40–50% GPU, 20–25% CPU, 10–15% motherboard and memory, and the rest on storage, cooling, and the case. Office and workstation builds shift money toward the CPU, memory, and storage instead.',
+  },
+  {
+    title: 'CPU and GPU balance',
+    text: 'A very fast CPU paired with a slow GPU wastes money in most games, while a flagship GPU on a weak CPU creates stutter and low 1% frame rates. Match the pair to your resolution: 1080p leans on the CPU, 1440p balances both, and 4K leans on the GPU. The Performance page shows which part is limiting your current selection.',
+  },
+  {
+    title: 'PSU safety checklist',
+    text: 'Choose a unit with enough wattage for transient spikes, not just the average draw. Prefer a reputable 80+ Bronze, Gold, or higher unit with the PCIe connectors your GPU actually needs. A 16-pin card needs either a native 12VHPWR/12V-2x6 cable or the adapter supplied with the card — never mix cables from different modular PSUs.',
+  },
+  {
+    title: 'Case clearance before checkout',
+    text: 'Check GPU length, CPU cooler height, radiator support, PSU length, and motherboard form factor together. A card can fit the case but still collide with front fans or a thick radiator. Leave a small margin instead of relying on the exact maximum, and confirm the cooler’s memory clearance if you use tall RGB modules.',
+  },
 ];
 
 const FAQ = [
   {
     q: 'Are the prices and stock levels real?',
-    a: 'No. Every price is an estimated sample value in Philippine pesos, and availability is illustrative sample data. Nothing in this app connects to a retailer or live inventory feed. Use the totals as a planning aid, then confirm prices with your local store.',
+    a: 'Prices use a configured live feed when one is available; otherwise the app falls back to clearly labelled sample estimates in Philippine pesos. Availability remains illustrative unless the feed supplies stock data. Treat every total as a planning aid and confirm the final price with your local store.',
   },
   {
     q: 'How accurate is the compatibility checker?',
@@ -87,7 +107,7 @@ export function render(root) {
             <ul class="about-list">
               <li>${icon('check', 15)}<span><strong>No fake results.</strong> Unknown specifications become verification warnings, never green checks.</span></li>
               <li>${icon('check', 15)}<span><strong>No hidden backend.</strong> Builds, presets, and sharing are handled with local storage and encoded URLs.</span></li>
-              <li>${icon('check', 15)}<span><strong>Clear pricing.</strong> Every amount is labelled as an estimated sample price in PHP.</span></li>
+              <li>${icon('check', 15)}<span><strong>Clear pricing.</strong> Amounts are labelled as live-feed prices or sample estimates in PHP.</span></li>
               <li>${icon('check', 15)}<span><strong>Responsive by default.</strong> Desktop, tablet, and phone layouts are part of the core design.</span></li>
               <li>${icon('check', 15)}<span><strong>Graceful fallbacks.</strong> Procedural product illustrations and 3D placeholders avoid broken images and empty scenes.</span></li>
             </ul>
@@ -112,6 +132,21 @@ export function render(root) {
 
       <section class="about-section">
         <div class="section-head">
+          <div><p class="eyebrow">Buying guides</p><h2 class="section-title">Practical rules of thumb</h2><p class="section-sub">Short checklists to use before you lock in a parts list.</p></div>
+        </div>
+        <div class="guide-grid">
+          ${GUIDES.map((guide, index) => `
+            <article class="guide-card">
+              <span class="guide-index">${String(index + 1).padStart(2, '0')}</span>
+              <h3>${guide.title}</h3>
+              <p>${guide.text}</p>
+            </article>
+          `).join('')}
+        </div>
+      </section>
+
+      <section class="about-section">
+        <div class="section-head">
           <div><p class="eyebrow">Good to know</p><h2 class="section-title">Frequently asked questions</h2></div>
         </div>
         <div class="faq-list">
@@ -129,7 +164,7 @@ export function render(root) {
           <span class="about-disclaimer-icon">${icon('info', 20)}</span>
           <div>
             <h2>Data & disclaimer</h2>
-            <p>PC Build Studio is a demonstration project. Product names, specifications, prices, and availability are realistic sample data assembled for the simulator; they are not an offer, quote, or guarantee. FPS figures are model-based estimates and not benchmark results. Compatibility checks cannot account for every revision, BIOS version, physical variation, or cable clearance. Always verify with the manufacturer or retailer before purchasing.</p>
+            <p>PC Build Studio is a demonstration project. Product names and specifications are realistic sample catalog data. Prices and availability come from a configured feed when available and otherwise use clearly labelled sample estimates; they are not an offer, quote, or guarantee. FPS figures are model-based estimates and not benchmark results. Compatibility checks cannot account for every revision, BIOS version, physical variation, or cable clearance. Always verify with the manufacturer or retailer before purchasing.</p>
             <p>Three.js is © three.js authors, used under the MIT license. Product names and trademarks belong to their respective owners. This project is not affiliated with any hardware manufacturer or retailer.</p>
           </div>
         </div>

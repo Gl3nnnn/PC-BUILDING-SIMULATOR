@@ -1,5 +1,6 @@
-import { escapeHtml, peso } from '../core/format.js';
+import { escapeHtml, formatDate, peso } from '../core/format.js';
 import { getIds } from '../core/build.js';
+import { itemPriceIsLive, priceNote, priceTitle } from '../core/prices.js';
 import { productArt } from './art.js';
 import { icon } from './icons.js';
 import { availabilityBadge, categoryLabel, keySpecs, specRows } from './specs.js';
@@ -33,7 +34,7 @@ export function productCard(item, options = {}) {
       <footer class="product-card-foot">
         <div class="price-block">
           <span class="price">${peso(item.price)}</span>
-          <span class="price-note" title="Estimated sample price in Philippine pesos">est. price</span>
+          <span class="price-note ${itemPriceIsLive(item) ? 'price-note--live' : ''}" title="${escapeHtml(priceTitle(item))}">${escapeHtml(priceNote(item))}</span>
         </div>
         <div class="card-actions">
           <button class="icon-btn" type="button" data-action="details" data-id="${item.id}" aria-label="View full specifications for ${escapeHtml(item.name)}" title="Full specifications">${icon('info', 16)}</button>
@@ -97,19 +98,21 @@ export function componentDetailsHTML(item, options = {}) {
           </div>
           <div class="detail-badges">
             ${availabilityBadge(item)}
-            <span class="badge badge--neutral">Sample catalog</span>
+            <span class="badge badge--${itemPriceIsLive(item) ? 'ok' : 'neutral'}">${itemPriceIsLive(item) ? 'Live price feed' : 'Sample catalog'}</span>
           </div>
           <div class="detail-price">
             <span class="price price--lg">${peso(item.price)}</span>
-            <span class="price-note">Estimated sample price · PHP</span>
+            <span class="price-note">${itemPriceIsLive(item) ? 'Retailer price · PHP' : 'Estimated sample price · PHP'}</span>
           </div>
+          ${item.buyUrl ? `<a class="btn btn--ghost btn--sm detail-buy" href="${escapeHtml(item.buyUrl)}" target="_blank" rel="noopener noreferrer nofollow sponsored">${icon('external', 14)}<span>View at ${escapeHtml(item.vendor || 'retailer')}</span></a>` : ''}
+          <p class="detail-price-meta" title="${escapeHtml(priceTitle(item))}">${item.priceUpdatedAt ? `Updated ${escapeHtml(formatDate(item.priceUpdatedAt, true))}` : 'Price snapshot not dated'}</p>
           <div class="spec-chips">${keySpecs(item).map((spec) => `<span class="spec-chip">${escapeHtml(spec)}</span>`).join('')}</div>
         </div>
       </div>
       <div class="detail-body">
         <h4 class="detail-heading">${icon('list', 16)} Specifications</h4>
         ${specTableHTML(item)}
-        <p class="detail-note">${icon('info', 14)} Specifications and availability are realistic sample data for demonstration. Prices are estimates in Philippine pesos and are not live retailer quotes.</p>
+        <p class="detail-note">${icon('info', 14)} ${itemPriceIsLive(item) ? `Price and stock come from the configured retailer feed${item.vendor ? ` (${escapeHtml(item.vendor)})` : ''}. Always confirm the final checkout price.` : 'Specifications and availability are realistic sample data for demonstration. Prices are estimates in Philippine pesos, not live retailer quotes.'}</p>
       </div>
       <footer class="detail-actions">
         <button class="btn btn--ghost" type="button" data-modal-close>Close</button>

@@ -1,0 +1,16 @@
+{
+  "name": "pc-build-studio",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first PC building configurator with compatibility checks, pricing, 3D previews, and performance estimates.",
+  "scripts": {
+    "start": "python -m http.server 8765",
+    "test": "node --test tests/*.test.mjs",
+    "validate": "node scripts/validate-data.mjs",
+    "check:prices": "node scripts/sync-prices.mjs --check",
+    "prices:sample": "node scripts/generate-prices.mjs",
+    "check": "npm run validate && npm run check:prices && npm test"
+  }
+}
+

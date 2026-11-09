@@ -3,6 +3,7 @@ import { encodeBuild, getItems, buildTotal } from './build.js';
 import { COMPATIBILITY_LABELS, evaluateBuild } from './compat.js';
 import { downloadFile, escapeHtml, formatDate, peso, safeFilename } from './format.js';
 import { keySpecs } from '../ui/specs.js';
+import { getPriceState } from './prices.js';
 
 export function shareUrl(build) {
   const base = `${location.origin === 'null' ? 'file://' : location.origin}${location.pathname}`;
@@ -70,6 +71,10 @@ function checkList(result) {
 export function buildPrintHTML(build, result) {
   const total = buildTotal(build);
   const budget = Number(build.budget) || 0;
+  const priceState = getPriceState();
+  const priceDisclosure = priceState.meta.source === 'feed'
+    ? `Prices come from the configured live feed (${escapeHtml(priceState.meta.provider)}) and reflect the latest snapshot available to this browser${priceState.meta.generatedAt ? ` (${escapeHtml(formatDate(priceState.meta.generatedAt, true))})` : ''}. Confirm the final checkout price and stock with the retailer.`
+    : 'Prices are sample estimates in Philippine pesos, not live retailer quotes. Stock availability is illustrative sample data.';
   const rows = CATEGORIES.flatMap((category) => getItems(build, category.id).map((item) => ({
     category: category.label,
     name: `${item.brand} ${item.name}`,
@@ -153,8 +158,8 @@ export function buildPrintHTML(build, result) {
   <h2>Compatibility report</h2>
   ${checkList(result)}
   <div class="notes">
-    <p><strong>About this document:</strong> Generated locally by PC Build Studio. Prices are estimated sample values in Philippine pesos and are not live retailer quotes. Stock availability is illustrative sample data.</p>
-    <p>Compatibility results are automatically derived from the specifications in the sample catalog. Verify final clearance, BIOS support, and power requirements with the manufacturer before purchasing.</p>
+    <p><strong>About this document:</strong> Generated locally by PC Build Studio. ${priceDisclosure}</p>
+    <p>Compatibility results are automatically derived from the specifications in the catalog. Verify final clearance, BIOS support, and power requirements with the manufacturer before purchasing.</p>
     <p>No account, server, or personal data is required — saved builds stay in this browser's local storage.</p>
   </div>
 </body>
