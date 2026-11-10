@@ -61,7 +61,7 @@ function sidePanelHTML() {
     ` : ''}
     <div class="viz-legend">
       <span class="viz-legend-swatch"></span>
-      <span>Wireframe outlines show parts you have not selected yet. Dimension markers use catalog measurements.</span>
+      <span>Wireframe outlines show parts you have not selected yet. Use Measure to reveal catalog dimension markers.</span>
     </div>
     <div class="viz-panel-actions">
       <a class="btn btn--primary btn--sm" href="#/builder">${icon('wrench', 14)}<span>Edit build</span></a>
@@ -95,7 +95,7 @@ export function render(root) {
             <div class="viz-toolbar-title">
               <span class="live-dot"></span>
               <span>Live scene</span>
-              <span class="viz-toolbar-count">${count} part${count === 1 ? '' : 's'}</span>
+              <span class="viz-toolbar-count" data-viz-count>${count} part${count === 1 ? '' : 's'}</span>
             </div>
             <div class="viz-toolbar-actions">
               <button class="viz-tool is-active" type="button" data-viz="rotate" aria-pressed="true" title="Toggle auto-rotate">
@@ -106,6 +106,9 @@ export function render(root) {
               </button>
               <button class="viz-tool" type="button" data-viz="explode" aria-pressed="false" title="Separate the case panels">
                 ${icon('panel', 15)}<span>Explode</span>
+              </button>
+              <button class="viz-tool" type="button" data-viz="measure" aria-pressed="false" title="Show catalog dimension markers">
+                ${icon('ruler', 15)}<span>Measure</span>
               </button>
               <button class="viz-tool" type="button" data-viz="reset" title="Reset camera">
                 ${icon('refresh', 15)}<span>Reset view</span>
@@ -122,7 +125,7 @@ export function render(root) {
             </div>
           </div>
           <div class="viz-overlay-hint">${icon('zoom', 14)}<span>Drag to orbit · Scroll to zoom</span></div>
-          <div class="viz-corner-label">${icon('cube', 13)}<span>${caseItem ? escapeHtml(caseItem.name) : 'No case selected'}</span></div>
+          <div class="viz-corner-label">${icon('cube', 13)}<span data-viz-case-name>${caseItem ? escapeHtml(caseItem.name) : 'No case selected'}</span></div>
         </section>
 
         <aside class="viz-panel" id="viz-panel">${sidePanelHTML()}</aside>
@@ -152,16 +155,19 @@ export function render(root) {
   const page = root.querySelector('.visualizer-page');
   const stage = page.querySelector('#viz-stage');
   const panel = page.querySelector('#viz-panel');
+  const countLabel = page.querySelector('[data-viz-count]');
+  const caseNameLabel = page.querySelector('[data-viz-case-name]');
   const rotateButton = page.querySelector('[data-viz="rotate"]');
   const rgbButton = page.querySelector('[data-viz="rgb"]');
   const explodeButton = page.querySelector('[data-viz="explode"]');
+  const measureButton = page.querySelector('[data-viz="measure"]');
   const shareOverlay = page.querySelector('#viz-share-overlay');
   const shareImage = page.querySelector('#viz-share-image');
   const shareDownload = page.querySelector('#viz-share-download');
 
   let sceneApi = null;
   let disposed = false;
-  const controls = { autoRotate: true, rgb: true, exploded: false };
+  const controls = { autoRotate: true, rgb: true, exploded: false, measure: false };
 
   function showFallback(message, detail = '') {
     const fallbackArt = getItems(store.getCurrent(), 'case')[0];
@@ -368,9 +374,20 @@ export function render(root) {
     rgbButton.setAttribute('aria-pressed', String(controls.rgb));
     explodeButton.classList.toggle('is-active', controls.exploded);
     explodeButton.setAttribute('aria-pressed', String(controls.exploded));
+    measureButton.classList.toggle('is-active', controls.measure);
+    measureButton.setAttribute('aria-pressed', String(controls.measure));
     sceneApi?.setAutoRotate(controls.autoRotate);
     sceneApi?.setRGB(controls.rgb);
     sceneApi?.setExploded(controls.exploded);
+    sceneApi?.setMeasure(controls.measure);
+  }
+
+  function updateBuildMeta() {
+    const current = store.getCurrent();
+    const count = selectedCount(current);
+    const currentCase = getItems(current, 'case')[0];
+    countLabel.textContent = `${count} part${count === 1 ? '' : 's'}`;
+    caseNameLabel.textContent = currentCase ? currentCase.name : 'No case selected';
   }
 
   page.addEventListener('click', async (event) => {
@@ -399,6 +416,9 @@ export function render(root) {
       updateControls();
     } else if (action === 'explode') {
       controls.exploded = !controls.exploded;
+      updateControls();
+    } else if (action === 'measure') {
+      controls.measure = !controls.measure;
       updateControls();
     } else if (action === 'reset') {
       sceneApi?.resetView();
@@ -433,6 +453,7 @@ export function render(root) {
   const unsubscribe = on('build', () => {
     const current = store.getCurrent();
     if (panel.isConnected) panel.innerHTML = sidePanelHTML();
+    updateBuildMeta();
     sceneApi?.updateBuild(current);
   });
 

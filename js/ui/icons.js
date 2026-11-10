@@ -59,6 +59,7 @@ const PATHS = {
   fan2: '<circle cx="12" cy="12" r="2"/><path d="M12 10c-1-4 1-7 4-6s3 5 0 7M14 12c4-1 7 1 6 4s-5 3-7 0M12 14c1 4-1 7-4 6s-3-5 0-7M10 12c-4 1-7-1-6-4s5-3 7 0"/>',
   memory: '<path d="M4 9h16v8H4zM7 9V6M12 9V6M17 9V6M7 17v3M12 17v3M17 17v3"/>',
   money: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/>',
+  ruler: '<path d="m3 15 6-6 2 2-6 6Z"/><path d="m11 13 2-2 3 3 5-5-3-3-2 2-3-3-5 5 3 3Z"/><path d="M5 13l1 1M9 9l1 1M13 13l1 1"/>',
 };
 
 export function icon(name, size = 18, className = '') {
