@@ -55,6 +55,8 @@ const PATHS = {
   refresh: '<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/>',
   download: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/>',
   panel: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/>',
+  expand: '<path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/>',
+  compress: '<path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/>',
   palette2: '<circle cx="12" cy="12" r="9"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="9" r="1.2"/><circle cx="9" cy="15" r="1.2"/><circle cx="15" cy="15" r="1.2"/>',
   fan2: '<circle cx="12" cy="12" r="2"/><path d="M12 10c-1-4 1-7 4-6s3 5 0 7M14 12c4-1 7 1 6 4s-5 3-7 0M12 14c1 4-1 7-4 6s-3-5 0-7M10 12c-4 1-7-1-6-4s5-3 7 0"/>',
   memory: '<path d="M4 9h16v8H4zM7 9V6M12 9V6M17 9V6M7 17v3M12 17v3M17 17v3"/>',

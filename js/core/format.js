@@ -1,8 +1,13 @@
+import { money } from './currency.js';
+
 const pesoFormatter = new Intl.NumberFormat('en-PH', { maximumFractionDigits: 0 });
 
+/**
+ * Money label for the active display currency. Amounts are always pesos;
+ * switching currency only changes how they read.
+ */
 export function peso(amount) {
-  const value = Number.isFinite(Number(amount)) ? Number(amount) : 0;
-  return `₱${pesoFormatter.format(value)}`;
+  return money(amount);
 }
 
 export function num(value) {

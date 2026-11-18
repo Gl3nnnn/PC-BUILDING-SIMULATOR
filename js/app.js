@@ -24,9 +24,16 @@ import { render as renderVisualizer } from './pages/visualizer.js';
 import { render as renderSaved } from './pages/saved.js';
 import { render as renderShowcase } from './pages/showcase.js';
 import { render as renderAbout } from './pages/about.js';
+import { render as renderCareer } from './pages/career.js';
+import { render as renderRepair } from './pages/repair.js';
+import { initialiseLanguage, onSettings } from './core/settings.js';
+import { onCurrencyChange } from './core/currency.js';
+import { sfx, unlockAudio } from './core/audio.js';
 
 const PAGES = {
   home: { title: 'PC Building Simulator', render: renderHome },
+  career: { title: 'Career Mode', render: renderCareer },
+  repair: { title: 'Repair Bench', render: renderRepair },
   builder: { title: 'PC Builder', render: renderBuilder },
   database: { title: 'Hardware Database', render: renderDatabase },
   compatibility: { title: 'Compatibility Checker', render: renderCompatibility },
@@ -661,7 +668,29 @@ if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
 await loadPrices();
 compare.init();
+initialiseLanguage();
 renderRoute();
+
+// Sound: unlock the audio context on the first real interaction, then play a
+// quiet tick for plain buttons. Buttons that make a specific noise (boot, coin,
+// error) call their own sound and are left alone here.
+const SILENT_ACTIONS = new Set(['wb-power', 'wb-collect', 'wb-rate', 'continue-job', 'daily-start', 'order-parts']);
+document.addEventListener('pointerdown', () => unlockAudio(), { once: true });
+document.addEventListener('click', (event) => {
+  const button = event.target.closest('button, a.btn, [data-diagnose], [data-take]');
+  if (!button || button.disabled) return;
+  if (button.dataset.action && SILENT_ACTIONS.has(button.dataset.action)) return;
+  sfx.click();
+});
+
+// A currency or language change only affects display copy, so the cheapest
+// correct response is to repaint the current route.
+onCurrencyChange(() => {
+  updateHeader();
+});
+onSettings(() => {
+  updateHeader();
+});
 
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener('load', () => {

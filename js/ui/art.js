@@ -14,6 +14,22 @@ const CATEGORY_COLORS = {
   fans: '#f472b6',
 };
 
+/* Real chassis finishes, matching the maker's own palette in the 3D
+   profiles: Corsair is near-black, Jonsbo is light silver, Fractal is
+   charcoal with oak. Before this every card was tinted with the accent, so a
+   Corsair case came out orange. */
+const CASE_BODY = {
+  Tecware: '#1a1d22',
+  Jonsbo: '#2a2c31',
+  'Lian Li': '#16181e',
+  NZXT: '#20232b',
+  Corsair: '#15171b',
+  'Fractal Design': '#2b2a26',
+  'Cooler Master': '#1b1626',
+  DeepCool: '#171c24',
+  ASUS: '#14161c',
+};
+
 const BRAND_COLORS = {
   Intel: '#5b8cff',
   AMD: '#ff4d5e',
@@ -228,32 +244,191 @@ function psuArt(accent, item) {
   `;
 }
 
-function caseArt(accent, item) {
+/* Each chassis draws its own body, front intake and fan layout. Before this,
+   every case was the same rounded box with three identical fans, so the cards
+   gave no clue which product you were looking at. */
+const CASE_DESIGNS = [
+  { test: /hyperion|gr701/i, w: 118, h: 162, rx: 11, frontFrac: 0.33, kind: 'alu', fans: 3, fanR: 17, mark: 'ROG', accentBar: 'top' },
+  { test: /o11|lancool 216|dynamic/i, w: 112, h: 156, rx: 8, frontFrac: 0.3, kind: 'glass', fans: 3, fanR: 14, mark: 'LIAN LI', accentBar: 'none', dual: true },
+  { test: /h5 flow/i, w: 104, h: 148, rx: 9, frontFrac: 0.31, kind: 'perf', fans: 2, fanR: 15, mark: 'NZXT', accentBar: 'band', bottom: true },
+  { test: /4000d/i, w: 106, h: 146, rx: 8, frontFrac: 0.3, kind: 'narrow', fans: 2, fanR: 14, mark: 'CORSAIR', accentBar: 'top' },
+  { test: /north/i, w: 106, h: 146, rx: 7, frontFrac: 0.34, kind: 'wood', fans: 2, fanR: 15, mark: 'FRACTAL', accentBar: 'none' },
+  { test: /nr200|nr 200/i, w: 98, h: 122, rx: 9, frontFrac: 0.32, kind: 'dots', fans: 2, fanR: 15, mark: 'COOLER MASTER', accentBar: 'top' },
+  { test: /matrexx/i, w: 102, h: 142, rx: 7, frontFrac: 0.31, kind: 'slats', fans: 3, fanR: 14, mark: 'DEEPCOOL', accentBar: 'top' },
+  { test: /forge m2/i, w: 102, h: 142, rx: 8, frontFrac: 0.32, kind: 'hex', fans: 3, fanR: 14, mark: 'TECWARE', accentBar: 'top' },
+  { test: /d31/i, w: 106, h: 134, rx: 10, frontFrac: 0.34, kind: 'dots', fans: 2, fanR: 16, mark: 'JONSBO', accentBar: 'top' },
+];
+
+const CASE_BY_SIZE = {
+  'Full Tower': { w: 112, h: 156, fans: 3, fanR: 15 },
+  'Mid Tower': { w: 104, h: 144, fans: 3, fanR: 14 },
+  SFF: { w: 96, h: 122, fans: 2, fanR: 14 },
+};
+
+function caseDesign(item) {
+  const name = item?.name || '';
+  for (const entry of CASE_DESIGNS) if (entry.test.test(name)) return entry;
   const size = item?.specs?.size || 'Mid Tower';
-  const height = size === 'Full Tower' ? 164 : size === 'SFF' ? 132 : 152;
-  const top = 100 - height / 2;
-  const width = size === 'Full Tower' ? 106 : size === 'SFF' ? 88 : 98;
+  const front = (item?.specs?.frontPanel || 'Mesh').toLowerCase();
+  const kind = front.includes('wood') ? 'wood' : front.includes('glass') ? 'glass' : front.includes('perfor') ? 'perf' : 'hex';
+  return { ...(CASE_BY_SIZE[size] || CASE_BY_SIZE['Mid Tower']), rx: 9, frontFrac: 0.32, kind, mark: '', accentBar: 'top' };
+}
+
+/** Front intake texture: real mesh, honeycomb, slats, wood or brushed metal. */
+function frontPanel(kind, id, tint) {
+  const solid = `rgba(7,10,18,0.9)`;
+  if (kind === 'glass' || kind === 'narrow') return { defs: '', fill: solid };
+  let body = '';
+  if (kind === 'hex') {
+    body = `<path d="M0 4 L4.6 1.3 L9.2 4 L9.2 9.4 L4.6 12 L0 9.4 Z" fill="none" stroke="rgba(190,215,255,0.3)" stroke-width="1"/>`;
+  } else if (kind === 'dots') {
+    body = `<circle cx="4" cy="4" r="1.35" fill="#05080e"/>`;
+  } else if (kind === 'perf') {
+    body = `<circle cx="3" cy="3" r="0.85" fill="#05080e"/><circle cx="3" cy="3" r="0.85" fill="none" stroke="rgba(180,205,240,0.16)"/>`;
+  } else if (kind === 'slats') {
+    body = `<rect y="0" width="12" height="3.2" fill="#05080e"/><path d="M0 3.2H12" stroke="rgba(170,200,245,0.22)" stroke-width="0.9"/>`;
+  } else if (kind === 'wood') {
+    body = `<rect width="9" height="26" fill="url(#woodg${id})"/><path d="M9 0V26" stroke="rgba(0,0,0,0.45)" stroke-width="1.2"/><path d="M2.4 0V26M5.4 0V26" stroke="rgba(0,0,0,0.18)" stroke-width="0.6"/>`;
+  } else if (kind === 'alu') {
+    body = `<path d="M0 0L12 12M-6 0L12 18M-12 0L12 24" stroke="rgba(255,255,255,0.09)" stroke-width="1"/><path d="M0 6H12M0 12H12M0 18H12" stroke="rgba(255,255,255,0.05)" stroke-width="0.6"/>`;
+  }
+  const size = kind === 'hex' ? [9.2, 12] : kind === 'dots' ? [8, 8] : kind === 'perf' ? [6, 6] : kind === 'slats' ? [12, 4.2] : kind === 'wood' ? [9, 26] : [12, 12];
+  return {
+    defs: `<pattern id="casefront${id}" width="${size[0]}" height="${size[1]}" patternUnits="userSpaceOnUse">${body}</pattern>`,
+    fill: `url(#casefront${id})`,
+  };
+}
+
+function caseMark(text, x, y) {
+  if (!text) return '';
+  return `<text x="${x}" y="${y}" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="5.5" letter-spacing="1.2" fill="rgba(226,236,252,0.5)">${escapeHtml(text)}</text>`;
+}
+
+function caseArt(accent, item, id) {
+  const size = item?.specs?.size || 'Mid Tower';
+  const look = caseDesign(item);
+  const width = look.w;
+  const height = look.h;
+  const GROUND = 170;
+  const top = GROUND - height;
   const left = 160 - width / 2;
-  const fanCount = size === 'SFF' ? 2 : 3;
-  const fanRadius = size === 'SFF' ? 15 : 18;
-  const fans = Array.from({ length: fanCount }, (_, index) => {
-    const y = top + 24 + index * (fanRadius * 2 + 12);
-    return fanFace(left + 22, y + fanRadius, fanRadius, accent, 0.85);
+  const frontW = Math.round(width * look.frontFrac);
+  const chin = 14;
+
+  const panel = frontPanel(look.kind, id, shade(accent, -0.55));
+  const edgeMaterial = shade(accent, -0.62);
+  const body = CASE_BODY[item?.brand] || '#1b2331';
+
+  // Fans sit in the front intake column, evenly spaced down its length.
+  // The radius is capped to the column so a ring can never poke out of the
+  // chassis, which is what made the cards look broken at small sizes.
+  const fanR = Math.min(look.fanR, frontW / 2 - 5);
+  const fanZoneTop = top + 10;
+  const fanZoneHeight = height - chin - 20;
+  const gap = fanZoneHeight / look.fans;
+  const fans = Array.from({ length: look.fans }, (_, index) => {
+    const cy = fanZoneTop + gap * (index + 0.5);
+    const cx = left + frontW / 2;
+    return fanFace(cx, cy, fanR, accent, look.kind === 'wood' ? 0.35 : 0.9);
   }).join('');
+
+  const accentBar = look.accentBar === 'top'
+    ? `<rect x="${left + width - 26}" y="${top + 7}" width="17" height="4" rx="2" fill="${accent}" opacity="0.85"/>`
+    : look.accentBar === 'band'
+      ? `<path d="M${left + 6} ${top + 12}h${width - 12}" stroke="${accent}" stroke-width="3" opacity="0.55"/>`
+      : '';
+
+  const glassSheen = `<path d="M${left + frontW + 6} ${top + 12} L${left + width - 10} ${top + 4} L${left + width - 10} ${top + height - 42} L${left + frontW + 12} ${top + height - 26} Z" fill="rgba(190,215,255,0.07)"/>`;
+
+  /* The glass side of the case shows a real machine inside: board, cooler,
+     graphics card, power supply and cable runs. A plain black window made
+     every chassis look like the same empty fridge. */
+  const iL = left + frontW + 4;
+  const iR = left + width - 9;
+  const iT = top + 8;
+  const iB = top + height - chin - 4;
+  const iw = iR - iL;
+  const ih = iB - iT;
+  const boardX = iL + iw * 0.2;
+  const boardY = iT + ih * 0.08;
+  const boardW = iw * 0.56;
+  const boardH = ih * 0.58;
+  const coolerX = boardX + boardW * 0.16;
+  const coolerY = boardY + boardH * 0.16;
+  const coolerR = Math.min(boardW * 0.19, boardH * 0.2);
+  const gpuX = iL + iw * 0.12;
+  const gpuY = boardY + boardH * 0.72;
+  const gpuW = iw * 0.74;
+  const gpuH = ih * 0.13;
+  const psuY = iB - ih * 0.14;
+  const interior = `
+    <rect x="${iL}" y="${iT}" width="${iw}" height="${ih}" fill="url(#caseinner${id})"/>
+    <rect x="${boardX}" y="${boardY}" width="${boardW}" height="${boardH}" rx="2" fill="#121a26" stroke="rgba(150,190,255,0.2)" stroke-width="0.8"/>
+    <rect x="${boardX + 3}" y="${boardY + 3}" width="${boardW - 6}" height="${boardH * 0.16}" rx="1.5" fill="#0d141f"/>
+    <circle cx="${coolerX + coolerR}" cy="${coolerY + coolerR}" r="${coolerR}" fill="#0a0f18" stroke="${accent}" stroke-width="1.2" opacity="0.9"/>
+    <circle cx="${coolerX + coolerR}" cy="${coolerY + coolerR}" r="${coolerR * 0.45}" fill="none" stroke="rgba(200,220,255,0.28)" stroke-width="0.8"/>
+    <path d="M${coolerX + coolerR - coolerR * 0.5} ${coolerY + coolerR}h${coolerR}" stroke="rgba(200,220,255,0.2)" stroke-width="0.7"/>
+    <rect x="${boardX + boardW * 0.82}" y="${boardY + boardH * 0.1}" width="${boardW * 0.13}" height="${boardH * 0.46}" rx="1" fill="#0c131d" stroke="${accent}" stroke-opacity="0.45" stroke-width="0.7"/>
+    <rect x="${gpuX}" y="${gpuY}" width="${gpuW}" height="${gpuH}" rx="2.5" fill="#151d2b" stroke="rgba(190,215,255,0.28)" stroke-width="0.8"/>
+    <path d="M${gpuX + 4} ${gpuY + 2.4}h${gpuW * 0.42}" stroke="${accent}" stroke-width="1.1" opacity="0.85"/>
+    <circle cx="${gpuX + gpuW * 0.3}" cy="${gpuY + gpuH * 0.62}" r="${gpuH * 0.3}" fill="#0a0f18" stroke="rgba(190,215,255,0.22)" stroke-width="0.6"/>
+    <circle cx="${gpuX + gpuW * 0.62}" cy="${gpuY + gpuH * 0.62}" r="${gpuH * 0.3}" fill="#0a0f18" stroke="rgba(190,215,255,0.22)" stroke-width="0.6"/>
+    <rect x="${gpuX + gpuW * 0.84}" y="${gpuY + gpuH * 0.3}" width="${gpuW * 0.1}" height="${gpuH * 0.4}" rx="1" fill="${accent}" opacity="0.5"/>
+    <path d="M${boardX + boardW * 0.74} ${boardY + boardH * 0.95}C${gpuX + gpuW * 0.5} ${gpuY - 6} ${psuY - 4} ${psuY - 2} ${iL + iw * 0.14} ${psuY}" fill="none" stroke="${accent}" stroke-width="1.1" opacity="0.32"/>
+    <rect x="${iL}" y="${psuY}" width="${iw}" height="${iB - psuY}" fill="#0a1018" opacity="0.9"/>
+    <path d="M${iL} ${psuY}H${iR}" stroke="rgba(190,215,255,0.2)" stroke-width="1"/>
+    <rect x="${iL + iw * 0.68}" y="${psuY + (iB - psuY) * 0.28}" width="${iw * 0.2}" height="${(iB - psuY) * 0.34}" rx="1" fill="${accent}" opacity="0.35"/>
+    <path d="M${iL + iw * 0.42} ${psuY}h${iw * 0.2}" stroke="rgba(200,220,255,0.35)" stroke-width="0.8"/>
+    <path d="M${iL + 6} ${iT + 5}h${iw * 0.28}M${iL + 6} ${iT + 9}h${iw * 0.22}" stroke="rgba(190,215,255,0.18)" stroke-width="0.8"/>
+  `;
+
+  const feet = look.bottom
+    ? `<path d="M${left + frontW + 4} ${top + height - chin - 20} l${width - frontW - 16} 6" stroke="rgba(190,215,255,0.16)" stroke-width="2"/>`
+    : '';
+
   return `
+    <defs>
+      ${panel.defs}
+      <linearGradient id="woodg${id}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#6b4726"/>
+        <stop offset="0.55" stop-color="#916138"/>
+        <stop offset="1" stop-color="#5c3c20"/>
+      </linearGradient>
+      <linearGradient id="casebody${id}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="${shade(body, 0.16)}"/>
+        <stop offset="0.45" stop-color="${body}"/>
+        <stop offset="1" stop-color="${shade(body, -0.3)}"/>
+      </linearGradient>
+      <radialGradient id="caseinner${id}" cx="38%" cy="32%" r="86%">
+        <stop offset="0" stop-color="#141c29"/>
+        <stop offset="0.55" stop-color="#0a111b"/>
+        <stop offset="1" stop-color="#05080f"/>
+      </radialGradient>
+      <clipPath id="caseclip${id}">
+        <rect x="${left}" y="${top}" width="${width}" height="${height}" rx="${look.rx}"/>
+      </clipPath>
+    </defs>
     <g>
-      <ellipse cx="160" cy="${top + height + 8}" rx="${width * 0.72}" ry="8" fill="#000" opacity="0.5"/>
-      <rect x="${left}" y="${top}" width="${width}" height="${height}" rx="8" fill="url(#metal)" stroke="rgba(255,255,255,0.16)"/>
-      <rect x="${left + 10}" y="${top + 10}" width="${width - 20}" height="${height - 34}" rx="4" fill="#070a12" opacity="0.86"/>
-      <rect x="${left + 10}" y="${top + 10}" width="${width - 20}" height="${height - 34}" rx="4" fill="none" stroke="rgba(255,255,255,0.08)"/>
+      <ellipse cx="160" cy="${GROUND + 9}" rx="${width * 0.7}" ry="8" fill="#000" opacity="0.55"/>
+      <rect x="${left}" y="${top}" width="${width}" height="${height}" rx="${look.rx}" fill="url(#casebody${id})" stroke="rgba(255,255,255,0.16)"/>
+      <g clip-path="url(#caseclip${id})">
+      <rect x="${left + 4}" y="${top + 4}" width="${width - 8}" height="${height - chin}" rx="${Math.max(2, look.rx - 3)}" fill="#060910" opacity="0.92"/>
+      ${interior}
+      <rect x="${left + 4}" y="${top + 4}" width="${frontW - 4}" height="${height - chin}" fill="${panel.fill}" opacity="0.9"/>
+      <path d="M${left + frontW} ${top + 4}V${top + height - chin}" stroke="${edgeMaterial}" stroke-width="2" opacity="0.9"/>
+      ${feet}
+      ${glassSheen}
+      <path d="M${left + width - 10} ${top + 10}V${top + height - chin - 6}" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>
       ${fans}
-      <path d="M${left + 10} ${top + 18} L${left + width - 22} ${top + 10} L${left + width - 22} ${top + height - 40} L${left + 18} ${top + height - 28} Z" fill="rgba(180,210,255,0.06)"/>
-      <path d="M${left + 8} ${top + height - 24} h${width - 16}" stroke="rgba(255,255,255,0.12)"/>
-      <circle cx="${left + width / 2}" cy="${top + height - 12}" r="2" fill="${accent}" opacity="0.7"/>
-      <rect x="${left - 2}" y="${top + height - 28}" width="${width + 4}" height="6" rx="3" fill="#0a0e17" stroke="rgba(255,255,255,0.08)"/>
-      <path d="M${left + width - 30} ${top + 6} h16" stroke="${accent}" stroke-width="3" opacity="0.7"/>
+      ${accentBar}
+      ${look.dual ? `<path d="M${left + 6} ${top + height - chin - 46}h${width - 12}" stroke="rgba(200,220,255,0.18)" stroke-width="1.5"/><rect x="${left + 6}" y="${top + height - chin - 42}" width="${width - 12}" height="42" fill="rgba(10,16,26,0.55)"/>` : ''}
+      <path d="M${left + width - 24} ${top + height - chin - 26}h12" stroke="${accent}" stroke-width="2" opacity="0.6"/>
+      <rect x="${left + 4}" y="${top + height - chin - 5}" width="${width - 8}" height="5" rx="2.5" fill="#080c14" stroke="rgba(255,255,255,0.1)"/>
+      <circle cx="${left + 8}" cy="${top + height - chin - 3.5}" r="1.4" fill="${accent}" opacity="0.85"/>
+      ${caseMark(look.mark, left + width - 12, top + height - chin - 3)}
+      </g>
     </g>
-    <text x="160" y="${top + height + 24}" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" letter-spacing="2.5" fill="${accent}" opacity="0.8">${escapeHtml(size.toUpperCase())}</text>
+    <text x="160" y="${GROUND + 23}" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" letter-spacing="2.5" fill="${accent}" opacity="0.8">${escapeHtml(size.toUpperCase())}</text>
   `;
 }
 
@@ -334,7 +509,7 @@ export function productArt(item, options = {}) {
   else if (category === 'ram') inner = ramArt(accent, Boolean(item?.specs?.rgb));
   else if (category === 'storage') inner = storageArt(accent, item);
   else if (category === 'psu') inner = psuArt(accent, item);
-  else if (category === 'case') inner = caseArt(accent, item);
+  else if (category === 'case') inner = caseArt(accent, item, id);
   else if (category === 'cooler') inner = coolerArt(accent, item);
   else if (category === 'fans') inner = fanArt(accent, item);
   else inner = fallbackArt(accent);

@@ -741,6 +741,17 @@
     justify-content: center;
   }
 
+  .viz-angle {
+    width: auto;
+    min-width: 0;
+    padding: 0 7px;
+    font-size: 9px;
+  }
+
+  .viz-toolgroup {
+    flex-wrap: nowrap;
+  }
+
   .viz-stage {
     height: 58vh;
     min-height: 340px;

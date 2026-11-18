@@ -28,14 +28,15 @@ function sidePanelHTML() {
     const category = CATEGORIES.find((entry) => entry.id === categoryId);
     const item = getItems(build, categoryId)[0];
     return `
-      <div class="viz-part ${item ? '' : 'is-empty'}">
+      <a class="viz-part ${item ? '' : 'is-empty'}" href="#/builder?cat=${encodeURIComponent(categoryId)}" title="${item ? 'Change' : 'Pick'} ${escapeHtml(category?.label || categoryId)}">
         <span class="viz-part-icon">${icon(category?.icon || 'dot', 15)}</span>
         <div class="viz-part-copy">
           <span>${escapeHtml(category?.label || categoryId)}</span>
           <strong>${item ? escapeHtml(item.name) : 'Not selected'}</strong>
         </div>
-        ${item ? `<span class="viz-part-price">${peso(item.price)}</span>` : ''}
-      </div>
+        ${item ? `<span class="viz-part-price">${peso(item.price)}</span>` : '<span class="viz-part-add">Add</span>'}
+        <span class="viz-part-go">${icon('chevronRight', 12)}</span>
+      </a>
     `;
   }).join('');
 
@@ -98,24 +99,38 @@ export function render(root) {
               <span class="viz-toolbar-count" data-viz-count>${count} part${count === 1 ? '' : 's'}</span>
             </div>
             <div class="viz-toolbar-actions">
-              <button class="viz-tool is-active" type="button" data-viz="rotate" aria-pressed="true" title="Toggle auto-rotate">
-                ${icon('rotate', 15)}<span>Auto-rotate</span>
-              </button>
-              <button class="viz-tool is-active" type="button" data-viz="rgb" aria-pressed="true" title="Toggle RGB lighting">
-                ${icon('sparkles', 15)}<span>RGB</span>
-              </button>
-              <button class="viz-tool" type="button" data-viz="explode" aria-pressed="false" title="Separate the case panels">
-                ${icon('panel', 15)}<span>Explode</span>
-              </button>
-              <button class="viz-tool" type="button" data-viz="measure" aria-pressed="false" title="Show catalog dimension markers">
-                ${icon('ruler', 15)}<span>Measure</span>
-              </button>
-              <button class="viz-tool" type="button" data-viz="reset" title="Reset camera">
-                ${icon('refresh', 15)}<span>Reset view</span>
-              </button>
-              <button class="viz-tool viz-tool--accent" type="button" data-viz="share-card" title="Create a shareable image">
-                ${icon('share', 15)}<span>Share card</span>
-              </button>
+              <div class="viz-toolgroup" role="group" aria-label="Camera angles">
+                <button class="viz-tool viz-angle is-active" type="button" data-viz="view" data-angle="side" title="Look at the side panel">Side</button>
+                <button class="viz-tool viz-angle" type="button" data-viz="view" data-angle="front" title="Look at the front panel">Front</button>
+                <button class="viz-tool viz-angle" type="button" data-viz="view" data-angle="rear" title="Look at the back panel">Rear</button>
+                <button class="viz-tool viz-angle" type="button" data-viz="view" data-angle="top" title="Look down on the roof">Top</button>
+              </div>
+              <div class="viz-toolgroup" role="group" aria-label="Zoom">
+                <button class="viz-tool" type="button" data-viz="zoom-out" title="Zoom out">${icon('minus', 15)}</button>
+                <button class="viz-tool" type="button" data-viz="zoom-in" title="Zoom in">${icon('plus', 15)}</button>
+              </div>
+              <div class="viz-toolgroup" role="group" aria-label="Scene options">
+                <button class="viz-tool" type="button" data-viz="explode" aria-pressed="false" title="Separate the case panels">
+                  ${icon('panel', 15)}<span>Explode</span>
+                </button>
+                <button class="viz-tool" type="button" data-viz="measure" aria-pressed="false" title="Show catalog dimension markers">
+                  ${icon('ruler', 15)}<span>Measure</span>
+                </button>
+                <button class="viz-tool is-active" type="button" data-viz="rotate" aria-pressed="true" title="Toggle auto-rotate">
+                  ${icon('rotate', 15)}<span>Spin</span>
+                </button>
+                <button class="viz-tool is-active" type="button" data-viz="rgb" aria-pressed="true" title="Toggle RGB lighting">
+                  ${icon('sparkles', 15)}<span>RGB</span>
+                </button>
+              </div>
+              <div class="viz-toolgroup" role="group" aria-label="View tools">
+                <button class="viz-tool" type="button" data-viz="fullscreen" aria-pressed="false" title="Fill the screen with the preview">
+                  ${icon('expand', 15)}<span>Full</span>
+                </button>
+                <button class="viz-tool viz-tool--accent" type="button" data-viz="share-card" title="Create a shareable image">
+                  ${icon('share', 15)}<span>Share card</span>
+                </button>
+              </div>
             </div>
           </div>
           <div class="viz-stage" id="viz-stage">
@@ -124,7 +139,7 @@ export function render(root) {
               <p>Assembling your 3D rig…</p>
             </div>
           </div>
-          <div class="viz-overlay-hint">${icon('zoom', 14)}<span>Drag to orbit · Scroll to zoom</span></div>
+          <div class="viz-overlay-hint">${icon('zoom', 14)}<span>Drag to orbit · Scroll to zoom · Tap a part to change it</span></div>
           <div class="viz-corner-label">${icon('cube', 13)}<span data-viz-case-name>${caseItem ? escapeHtml(caseItem.name) : 'No case selected'}</span></div>
         </section>
 
@@ -161,13 +176,16 @@ export function render(root) {
   const rgbButton = page.querySelector('[data-viz="rgb"]');
   const explodeButton = page.querySelector('[data-viz="explode"]');
   const measureButton = page.querySelector('[data-viz="measure"]');
+  const fullscreenButton = page.querySelector('[data-viz="fullscreen"]');
+  const viewer = page.querySelector('.viz-viewer');
+  const angleButtons = page.querySelectorAll('[data-viz="view"]');
   const shareOverlay = page.querySelector('#viz-share-overlay');
   const shareImage = page.querySelector('#viz-share-image');
   const shareDownload = page.querySelector('#viz-share-download');
 
   let sceneApi = null;
   let disposed = false;
-  const controls = { autoRotate: true, rgb: true, exploded: false, measure: false };
+  const controls = { autoRotate: true, rgb: true, exploded: false, measure: false, angle: 'side', fullscreen: false };
 
   function showFallback(message, detail = '') {
     const fallbackArt = getItems(store.getCurrent(), 'case')[0];
@@ -376,6 +394,13 @@ export function render(root) {
     explodeButton.setAttribute('aria-pressed', String(controls.exploded));
     measureButton.classList.toggle('is-active', controls.measure);
     measureButton.setAttribute('aria-pressed', String(controls.measure));
+    fullscreenButton.classList.toggle('is-active', controls.fullscreen);
+    fullscreenButton.setAttribute('aria-pressed', String(controls.fullscreen));
+    viewer.classList.toggle('is-maximized', controls.fullscreen);
+    fullscreenButton.innerHTML = controls.fullscreen
+      ? `${icon('compress', 15)}<span>Exit full</span>`
+      : `${icon('expand', 15)}<span>Full</span>`;
+    angleButtons.forEach((angle) => angle.classList.toggle('is-active', angle.dataset.angle === controls.angle));
     sceneApi?.setAutoRotate(controls.autoRotate);
     sceneApi?.setRGB(controls.rgb);
     sceneApi?.setExploded(controls.exploded);
@@ -420,6 +445,19 @@ export function render(root) {
     } else if (action === 'measure') {
       controls.measure = !controls.measure;
       updateControls();
+    } else if (action === 'view') {
+      controls.angle = button.dataset.angle || 'side';
+      controls.autoRotate = false;
+      sceneApi?.setView(controls.angle);
+      updateControls();
+    } else if (action === 'zoom-in') {
+      sceneApi?.zoom(0.86);
+    } else if (action === 'zoom-out') {
+      sceneApi?.zoom(1.16);
+    } else if (action === 'fullscreen') {
+      controls.fullscreen = !controls.fullscreen;
+      updateControls();
+      sceneApi?.resetView();
     } else if (action === 'reset') {
       sceneApi?.resetView();
       controls.autoRotate = true;
@@ -446,9 +484,20 @@ export function render(root) {
     }
   });
 
-  page.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !shareOverlay.hidden) shareOverlay.hidden = true;
-  });
+  function onKeyDown(event) {
+    if (event.key !== 'Escape') return;
+    if (!shareOverlay.hidden) {
+      shareOverlay.hidden = true;
+      return;
+    }
+    if (controls.fullscreen) {
+      controls.fullscreen = false;
+      updateControls();
+      sceneApi?.resetView();
+    }
+  }
+
+  document.addEventListener('keydown', onKeyDown);
 
   const unsubscribe = on('build', () => {
     const current = store.getCurrent();
@@ -461,6 +510,7 @@ export function render(root) {
 
   return () => {
     disposed = true;
+    document.removeEventListener('keydown', onKeyDown);
     unsubscribe();
     sceneApi?.dispose();
     sceneApi = null;

@@ -54,8 +54,30 @@
 
 .viz-toolbar-actions {
   display: flex;
-  gap: 5px;
+  gap: 6px;
   flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.viz-toolgroup {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: rgba(6, 10, 18, 0.82);
+  backdrop-filter: blur(12px);
+}
+
+.viz-toolgroup .viz-tool {
+  border-color: transparent;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.viz-angle {
+  min-width: 34px;
+  justify-content: center;
 }
 
 .viz-tool {
@@ -91,6 +113,19 @@
   height: clamp(460px, 66vh, 760px);
   touch-action: none;
   cursor: grab;
+  overflow: hidden;
+}
+
+.viz-viewer.is-maximized {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  border: 0;
+  border-radius: 0;
+}
+
+.viz-viewer.is-maximized .viz-stage {
+  height: 100vh;
 }
 
 .viz-stage.is-ready {
@@ -273,12 +308,39 @@
   align-items: center;
   gap: 8px;
   padding: 7px 8px;
+  border: 1px solid transparent;
   border-radius: 7px;
-  transition: background 0.16s;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.16s, border-color 0.16s;
 }
 
 .viz-part:hover {
-  background: rgba(148, 163, 184, 0.05);
+  background: rgba(148, 163, 184, 0.07);
+  border-color: var(--line);
+}
+
+.viz-part-add {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8fa7ff;
+  white-space: nowrap;
+}
+
+.viz-part-go {
+  display: flex;
+  align-items: center;
+  color: #5c6883;
+  opacity: 0;
+  transition: opacity 0.16s, transform 0.16s;
+  transform: translateX(-3px);
+}
+
+.viz-part:hover .viz-part-go {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .viz-part-icon {
