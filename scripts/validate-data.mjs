@@ -5,7 +5,7 @@ const PRICE_PATH = new URL('../data/prices.json', import.meta.url);
 const AVAILABILITY = new Set(['in-stock', 'low-stock', 'preorder']);
 const errors = [];
 
-if (HARDWARE.length !== 100) errors.push(`Expected 100 hardware items, found ${HARDWARE.length}.`);
+if (HARDWARE.length < 100) errors.push(`Expected at least 100 hardware items, found ${HARDWARE.length}.`);
 if (Object.keys(HARDWARE_BY_ID).length !== HARDWARE.length) errors.push('Duplicate hardware IDs found.');
 
 const categories = new Set(CATEGORIES.map((category) => category.id));
@@ -25,6 +25,14 @@ for (const category of CATEGORIES) {
   const count = HARDWARE.filter((item) => item.category === category.id).length;
   if (!count) errors.push(`Category "${category.id}" has no hardware.`);
 }
+
+const physicalMissing = HARDWARE.filter((item) => !Array.isArray(item.specs?.dimensions) || !Number.isFinite(Number(item.specs?.power)) || !Number.isFinite(Number(item.specs?.weight)));
+if (physicalMissing.length) errors.push(`Components missing dimensions/power/weight: ${physicalMissing.map((item) => item.id).join(', ')}`);
+
+const REQUIRED_BRANDS = ['AMD', 'Intel', 'NVIDIA', 'ASUS', 'MSI', 'Gigabyte', 'Corsair', 'Kingston', 'Samsung'];
+const brands = new Set(HARDWARE.map((item) => item.brand));
+const missingBrands = REQUIRED_BRANDS.filter((brand) => !brands.has(brand));
+if (missingBrands.length) errors.push(`Catalogue has no parts from: ${missingBrands.join(', ')}`);
 
 const gpuMissing = HARDWARE.filter((item) => item.category === 'gpu' && (!Number.isFinite(Number(item.specs?.length)) || !Number.isFinite(Number(item.specs?.tdp))));
 if (gpuMissing.length) errors.push(`GPUs missing length or TDP: ${gpuMissing.map((item) => item.id).join(', ')}`);

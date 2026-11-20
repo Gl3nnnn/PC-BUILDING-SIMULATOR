@@ -56,7 +56,7 @@ export function render(root) {
       <header class="page-head">
         <div>
           <p class="eyebrow">Local to this browser</p>
-          <h1 class="page-title">Saved Builds</h1>
+          <h1 class="page-title">My Builds</h1>
           <p class="page-subtitle">Save configurations, rename them, export a shopping summary, or share an encoded build link. No account needed.</p>
         </div>
         <div class="page-actions">
@@ -95,11 +95,12 @@ export function render(root) {
         <div class="saved-summary-stat"><span>${icon('download', 15)} Combined value</span><strong>${peso(totalValue)}</strong></div>
         <div class="saved-summary-stat"><span>${icon('lock', 15)} Privacy</span><strong>Stored on this device</strong></div>
         <div class="saved-summary-actions">
+          <a class="btn btn--ghost btn--sm" href="#/data">${icon('database', 14)}<span>Backup &amp; history</span></a>
           <button class="btn btn--danger-ghost btn--sm" type="button" data-action="clear-saved">${icon('trash', 14)}<span>Clear all</span></button>
         </div>
       </div>
       <div class="saved-grid">${saved.map((entry) => savedCard(entry, current)).join('')}</div>
-      <p class="saved-note">${icon('info', 13)} Saved locally with <code>localStorage</code>. Clearing browser data removes saved builds. Export any build you want to keep long-term.</p>
+      <p class="saved-note">${icon('info', 13)} Saved in this browser’s local build library. Clearing browser data removes saved builds — back them up from <a href="#/data">Data &amp; Storage</a>.</p>
     `;
   }
 

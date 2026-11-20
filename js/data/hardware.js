@@ -1,3 +1,5 @@
+import { attachPhysicalSpecs } from './component-specs.js';
+
 export const CATEGORIES = [
   { id: 'cpu', label: 'CPU', singular: 'Processor', required: true, multi: false, icon: 'cpu', blurb: 'Intel & AMD processors' },
   { id: 'motherboard', label: 'Motherboard', singular: 'Motherboard', required: true, multi: false, icon: 'motherboard', blurb: 'Sockets, chipsets & form factors' },
@@ -8,6 +10,7 @@ export const CATEGORIES = [
   { id: 'case', label: 'PC Case', singular: 'PC case', required: true, multi: false, icon: 'case', blurb: 'ATX, Micro-ATX & Mini-ITX' },
   { id: 'cooler', label: 'CPU Cooler', singular: 'CPU cooler', required: false, multi: false, icon: 'cooler', blurb: 'Air & liquid cooling' },
   { id: 'fans', label: 'Case Fans', singular: 'Fan kit', required: false, multi: true, icon: 'fan', blurb: 'Airflow, static pressure & RGB' },
+  { id: 'cables', label: 'Cables & Accessories', singular: 'Cable', required: false, multi: true, icon: 'cable', blurb: 'PSU, SATA, fan & adapter cables' },
 ];
 
 export const HARDWARE = [
@@ -459,7 +462,148 @@ export const HARDWARE = [
     id: 'fans-noctua-a12x25-2', category: 'fans', name: 'Noctua NF-A12x25 PWM (2-Pack)', brand: 'Noctua', price: 4650, availability: 'in-stock',
     specs: { size: 120, count: 2, airflow: 60.1, noise: 22.6, rgb: false, connector: '4-pin PWM' },
   },
+  {
+    id: 'gpu-asus-strix-4070s', category: 'gpu', name: 'ASUS ROG Strix RTX 4070 Super 12GB', brand: 'ASUS', price: 49900, availability: 'in-stock',
+    specs: { chip: 'AD104', vram: 12, memoryType: 'GDDR6X', length: 336, tdp: 245, powerConnectors: '1× 16-pin (12VHPWR)', boostClock: 2505, ports: '2× HDMI 2.1a, 3× DP 1.4a', boardPartner: 'ASUS', coolerFans: 3 },
+    score: 48, tags: ['1440p', 'high-end', 'ROG'],
+  },
+  {
+    id: 'gpu-msi-gamingx-4060ti', category: 'gpu', name: 'MSI GeForce RTX 4060 Ti Gaming X 8GB', brand: 'MSI', price: 29800, availability: 'in-stock',
+    specs: { chip: 'AD106', vram: 8, memoryType: 'GDDR6', length: 276, tdp: 165, powerConnectors: '1× 8-pin', boostClock: 2610, ports: '1× HDMI 2.1a, 3× DP 1.4a', boardPartner: 'MSI', coolerFans: 3 },
+    score: 33, tags: ['gaming', '1080p', '1440p'],
+  },
+  {
+    id: 'gpu-gigabyte-4060-gaming', category: 'gpu', name: 'Gigabyte GeForce RTX 4060 Gaming OC 8GB', brand: 'Gigabyte', price: 21200, availability: 'in-stock',
+    specs: { chip: 'AD107', vram: 8, memoryType: 'GDDR6', length: 250, tdp: 118, powerConnectors: '1× 8-pin', boostClock: 2550, ports: '2× HDMI 2.1a, 2× DP 1.4a', boardPartner: 'Gigabyte', coolerFans: 3 },
+    score: 27, tags: ['gaming', '1080p', 'triple fan'],
+  },
+  {
+    id: 'gpu-asus-dual-4060', category: 'gpu', name: 'ASUS Dual RTX 4060 8GB', brand: 'ASUS', price: 20400, availability: 'in-stock',
+    specs: { chip: 'AD107', vram: 8, memoryType: 'GDDR6', length: 227, tdp: 115, powerConnectors: '1× 8-pin', boostClock: 2490, ports: '1× HDMI 2.1a, 3× DP 1.4a', boardPartner: 'ASUS', coolerFans: 2 },
+    score: 26, tags: ['gaming', '1080p', 'compact'],
+  },
+  {
+    id: 'gpu-msi-ventus-3050', category: 'gpu', name: 'MSI GeForce RTX 3050 Ventus 2X 6GB', brand: 'MSI', price: 11200, availability: 'in-stock',
+    specs: { chip: 'GA107', vram: 6, memoryType: 'GDDR6', length: 200, tdp: 70, powerConnectors: 'None (slot powered)', boostClock: 1492, ports: '1× HDMI 2.1, 3× DP 1.4a', boardPartner: 'MSI', coolerFans: 2 },
+    score: 13, tags: ['entry', '1080p'],
+  },
+  {
+    id: 'gpu-sapphire-nitro-7800xt', category: 'gpu', name: 'Sapphire Nitro+ RX 7800 XT 16GB', brand: 'Sapphire', price: 39900, availability: 'in-stock',
+    specs: { chip: 'Navi 32', vram: 16, memoryType: 'GDDR6', length: 320, tdp: 288, powerConnectors: '2× 8-pin', boostClock: 2475, ports: '2× HDMI 2.1, 2× DP 2.1', boardPartner: 'Sapphire', coolerFans: 3 },
+    score: 42, tags: ['1440p', '4K', 'premium'],
+  },
+  {
+    id: 'gpu-asus-tuf-7800xt', category: 'gpu', name: 'ASUS TUF Gaming RX 7800 XT 16GB', brand: 'ASUS', price: 38200, availability: 'low-stock',
+    specs: { chip: 'Navi 32', vram: 16, memoryType: 'GDDR6', length: 320, tdp: 278, powerConnectors: '2× 8-pin', boostClock: 2520, ports: '1× HDMI 2.1, 3× DP 2.1', boardPartner: 'ASUS', coolerFans: 3 },
+    score: 41, tags: ['1440p', 'durable build'],
+  },
+  {
+    id: 'gpu-gigabyte-7600-gaming', category: 'gpu', name: 'Gigabyte Radeon RX 7600 Gaming OC 8GB', brand: 'Gigabyte', price: 19800, availability: 'in-stock',
+    specs: { chip: 'Navi 33', vram: 8, memoryType: 'GDDR6', length: 282, tdp: 180, powerConnectors: '1× 8-pin', boostClock: 2755, ports: '2× HDMI 2.1, 2× DP 1.4a', boardPartner: 'Gigabyte', coolerFans: 3 },
+    score: 29, tags: ['gaming', '1080p', 'AMD value'],
+  },
+  {
+    id: 'gpu-powercolor-hellhound-6600', category: 'gpu', name: 'PowerColor Hellhound RX 6600 8GB', brand: 'PowerColor', price: 13400, availability: 'in-stock',
+    specs: { chip: 'Navi 23', vram: 8, memoryType: 'GDDR6', length: 220, tdp: 132, powerConnectors: '1× 8-pin', boostClock: 2491, ports: '1× HDMI 2.1, 3× DP 1.4a', boardPartner: 'PowerColor', coolerFans: 2 },
+    score: 17, tags: ['budget', '1080p', 'snow white'],
+  },
+  {
+    id: 'gpu-nvidia-5070ti', category: 'gpu', name: 'NVIDIA GeForce RTX 5070 Ti 16GB', brand: 'NVIDIA', price: 84900, availability: 'preorder',
+    specs: { chip: 'GB203', vram: 16, memoryType: 'GDDR7', length: 304, tdp: 300, powerConnectors: '1× 16-pin (12V-2x6)', boostClock: 2610, ports: '1× HDMI 2.1b, 3× DP 2.1b' },
+    score: 62, tags: ['1440p', '4K', 'new generation'],
+  },
+
+  {
+    id: 'psu-asus-rog-strix-1000', category: 'psu', name: 'ASUS ROG Strix 1000W Gold Aura', brand: 'ASUS', price: 13900, availability: 'in-stock',
+    specs: { wattage: 1000, efficiency: '80+ Gold', modular: 'Fully modular', formFactor: 'ATX', length: 160, pcie8pin: 6, twelveVHPWR: true, warranty: '10 years' },
+  },
+  {
+    id: 'psu-gigabyte-aorus-850', category: 'psu', name: 'Gigabyte AORUS P850W Gold', brand: 'Gigabyte', price: 8900, availability: 'in-stock',
+    specs: { wattage: 850, efficiency: '80+ Gold', modular: 'Fully modular', formFactor: 'ATX', length: 140, pcie8pin: 4, twelveVHPWR: false, warranty: '10 years' },
+  },
+  {
+    id: 'psu-nzxt-c850', category: 'psu', name: 'NZXT C850 Gold ATX 3.1', brand: 'NZXT', price: 9250, availability: 'in-stock',
+    specs: { wattage: 850, efficiency: '80+ Gold', modular: 'Fully modular', formFactor: 'ATX', length: 150, pcie8pin: 4, twelveVHPWR: true, warranty: '10 years' },
+  },
+
+  {
+    id: 'cooler-msi-coreliquid-360', category: 'cooler', name: 'MSI MAG CORELIQUID 360R V2', brand: 'MSI', price: 7900, availability: 'in-stock',
+    specs: { type: 'Liquid', sockets: ['AM4', 'AM5', 'LGA1700', 'LGA1851'], height: 55, radiatorSize: 360, tdp: 320, ramClearance: null, fans: 3, rgb: true, noise: 'Up to 33 dBA' },
+  },
+  {
+    id: 'cooler-gigabyte-aorus-360', category: 'cooler', name: 'Gigabyte AORUS WATERFORCE X 360', brand: 'Gigabyte', price: 9500, availability: 'in-stock',
+    specs: { type: 'Liquid', sockets: ['AM4', 'AM5', 'LGA1700'], height: 60, radiatorSize: 360, tdp: 330, ramClearance: null, fans: 3, rgb: true, noise: 'Up to 31 dBA' },
+  },
+
+  {
+    id: 'fans-nzxt-f120-3', category: 'fans', name: 'NZXT F120 RGB Core 120mm (3-Pack)', brand: 'NZXT', price: 4350, availability: 'in-stock',
+    specs: { size: 120, count: 3, airflow: 60.2, noise: 29.5, rgb: true, connector: '4-pin PWM + 5V ARGB' },
+  },
+  {
+    id: 'fans-cm-mf120-3', category: 'fans', name: 'Cooler Master MasterFan MF120 Halo 2 (3-Pack)', brand: 'Cooler Master', price: 3450, availability: 'in-stock',
+    specs: { size: 120, count: 3, airflow: 51.2, noise: 30, rgb: true, connector: '4-pin PWM + ARGB' },
+  },
+  {
+    id: 'fans-msi-p12-3', category: 'fans', name: 'MSI MPG F120 ARGB 120mm (3-Pack)', brand: 'MSI', price: 3250, availability: 'in-stock',
+    specs: { size: 120, count: 3, airflow: 58.4, noise: 28.7, rgb: true, connector: '4-pin PWM + ARGB' },
+  },
+  {
+    id: 'fans-gigabyte-aorus-140-2', category: 'fans', name: 'Gigabyte AORUS 140 ARGB 140mm (2-Pack)', brand: 'Gigabyte', price: 2950, availability: 'in-stock',
+    specs: { size: 140, count: 2, airflow: 70.2, noise: 27.8, rgb: true, connector: '4-pin PWM + ARGB' },
+  },
+  {
+    id: 'fans-deepcool-fc120-3', category: 'fans', name: 'DeepCool FC120 120mm (3-Pack)', brand: 'DeepCool', price: 2650, availability: 'in-stock',
+    specs: { size: 120, count: 3, airflow: 61.6, noise: 28, rgb: true, connector: '4-pin PWM + ARGB (daisy chain)' },
+  },
+  {
+    id: 'fans-asus-tuf-t120-3', category: 'fans', name: 'ASUS TUF Gaming TF120 ARGB (3-Pack)', brand: 'ASUS', price: 3050, availability: 'in-stock',
+    specs: { size: 120, count: 3, airflow: 62.4, noise: 29, rgb: true, connector: '4-pin PWM + ARGB' },
+  },
+  {
+    id: 'fans-samsung-none', category: 'fans', name: 'Samsung SF120 ARGB 120mm (3-Pack)', brand: 'Samsung', price: 2850, availability: 'preorder',
+    specs: { size: 120, count: 3, airflow: 55.8, noise: 27.5, rgb: true, connector: '4-pin PWM + ARGB' },
+  },
+
+  {
+    id: 'cable-corsair-type4-24pin', category: 'cables', name: 'Corsair Type-4 24-pin ATX Cable (600mm)', brand: 'Corsair', price: 1450, availability: 'in-stock',
+    specs: { type: 'PSU 24-pin', length: 600, gauge: '16 AWG', connectorA: '24-pin ATX', connectorB: 'Corsair Type-4', rating: '300 W', sleeved: true },
+  },
+  {
+    id: 'cable-corsair-type4-pcie', category: 'cables', name: 'Corsair Type-4 PCIe 8-pin Cable (650mm)', brand: 'Corsair', price: 950, availability: 'in-stock',
+    specs: { type: 'GPU 8-pin', length: 650, gauge: '16 AWG', connectorA: '2× PCIe 8-pin', connectorB: 'Corsair Type-4', rating: '300 W', sleeved: true },
+  },
+  {
+    id: 'cable-corsair-12vhpwr', category: 'cables', name: 'Corsair 600W 12VHPWR Cable (650mm)', brand: 'Corsair', price: 1650, availability: 'in-stock',
+    specs: { type: 'GPU 16-pin', length: 650, gauge: '16 AWG', connectorA: '16-pin (12V-2x6)', connectorB: '2× Corsair Type-4', rating: '600 W', sleeved: true },
+  },
+  {
+    id: 'cable-seasonic-12vhpwr', category: 'cables', name: 'Seasonic 12VHPWR 600W Cable (700mm)', brand: 'Seasonic', price: 1500, availability: 'in-stock',
+    specs: { type: 'GPU 16-pin', length: 700, gauge: '16 AWG', connectorA: '16-pin (12V-2x6)', connectorB: '2× Seasonic 8-pin', rating: '600 W', sleeved: false },
+  },
+  {
+    id: 'cable-lianli-strimer-gpu', category: 'cables', name: 'Lian Li Strimer Plus V2 RGB GPU Cable', brand: 'Lian Li', price: 3450, availability: 'low-stock',
+    specs: { type: 'RGB extension', length: 330, gauge: '18 AWG', connectorA: '16-pin (12VHPWR)', connectorB: '16-pin (12VHPWR)', rating: '600 W', sleeved: false, rgb: true },
+  },
+  {
+    id: 'cable-startech-sata-3', category: 'cables', name: 'StarTech SATA III Cable 6Gb/s (450mm, 3-pack)', brand: 'StarTech', price: 650, availability: 'in-stock',
+    specs: { type: 'SATA data', length: 450, gauge: '26 AWG', connectorA: 'SATA data', connectorB: 'SATA data', rating: '6 Gb/s', sleeved: false },
+  },
+  {
+    id: 'cable-cm-fan-splitter', category: 'cables', name: 'Cooler Master 4-pin Fan Splitter (1 to 3)', brand: 'Cooler Master', price: 320, availability: 'in-stock',
+    specs: { type: 'Fan splitter', length: 300, gauge: '22 AWG', connectorA: '4-pin PWM', connectorB: '3× 4-pin PWM', rating: '3 A total', sleeved: false },
+  },
+  {
+    id: 'cable-deepcool-argb-hub', category: 'cables', name: 'DeepCool SC700 ARGB Hub + Cable', brand: 'DeepCool', price: 890, availability: 'in-stock',
+    specs: { type: 'ARGB hub', length: 500, gauge: '22 AWG', connectorA: 'SATA power + 5V ARGB', connectorB: '6× 5V ARGB', rating: '5 A', sleeved: false, rgb: true },
+  },
+  {
+    id: 'cable-nzxt-usb-header', category: 'cables', name: 'NZXT USB 2.0 Internal Header Extension (300mm)', brand: 'NZXT', price: 450, availability: 'in-stock',
+    specs: { type: 'USB header', length: 300, gauge: '28 AWG', connectorA: 'USB 2.0 9-pin', connectorB: 'USB 2.0 9-pin', rating: '480 Mbps', sleeved: true },
+  },
 ];
+
+// Every item carries real dimensions, power draw, weight and a visual asset marker.
+attachPhysicalSpecs(HARDWARE);
 
 export const HARDWARE_BY_ID = Object.fromEntries(HARDWARE.map((item) => [item.id, item]));
 

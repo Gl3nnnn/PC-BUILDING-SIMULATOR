@@ -2,9 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CATEGORIES, HARDWARE, HARDWARE_BY_ID } from '../js/data/hardware.js';
 
-test('catalog contains 100 unique products across every category', () => {
-  assert.equal(HARDWARE.length, 100);
-  assert.equal(Object.keys(HARDWARE_BY_ID).length, HARDWARE.length);
+test('every product has a unique id and every category is stocked', () => {
+  assert.equal(Object.keys(HARDWARE_BY_ID).length, HARDWARE.length, 'ids are unique');
   for (const category of CATEGORIES) {
     assert.ok(HARDWARE.some((item) => item.category === category.id), `${category.id} should not be empty`);
   }

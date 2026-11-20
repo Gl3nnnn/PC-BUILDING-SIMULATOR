@@ -92,6 +92,17 @@ export const sfx = {
     tone({ freq: 520, to: 780, duration: 0.09, type: 'sine', gain: 0.3 });
     burst({ duration: 0.05, freq: 1800, gain: 0.08 });
   },
+  /** A part clicks into its socket: a soft thud, then a latch. */
+  install() {
+    tone({ freq: 300, to: 190, duration: 0.07, type: 'triangle', gain: 0.3 });
+    burst({ duration: 0.06, freq: 900, gain: 0.12 });
+    tone({ freq: 900, to: 1200, duration: 0.05, type: 'square', gain: 0.05, delay: 0.07 });
+  },
+  /** Pulling a part back out: a short reverse of the install thud. */
+  remove() {
+    tone({ freq: 190, to: 320, duration: 0.09, type: 'triangle', gain: 0.22 });
+    burst({ duration: 0.05, freq: 1100, gain: 0.09 });
+  },
   /** Wrong part, wrong bay, failed check. */
   error() {
     tone({ freq: 190, to: 120, duration: 0.22, type: 'sawtooth', gain: 0.16 });

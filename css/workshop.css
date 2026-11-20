@@ -1,0 +1,965 @@
+/* ==========================================================================
+   3D PC Workshop
+   A full-screen workbench: the rig sits on the bench, panels can come off, and
+   parts are dragged from the inventory into their bays.
+   ========================================================================== */
+
+.workshop-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: calc(100vh - 210px);
+  min-height: 540px;
+}
+
+.ws-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 14px;
+}
+
+.ws-viewport {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: radial-gradient(120% 120% at 50% 10%, #131b2b 0%, #080b12 60%, #05070c 100%);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 60px -30px rgba(0, 0, 0, 0.9);
+}
+
+.ws-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.ws-canvas .pc-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.ws-canvas .pc-canvas.is-grabbing {
+  cursor: grabbing;
+}
+
+/* --- floating toolbar ---------------------------------------------------- */
+
+.ws-toolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.ws-toolbar > * {
+  pointer-events: auto;
+}
+
+.ws-toolgroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 12px;
+  background: rgba(9, 13, 21, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(10px);
+}
+
+.ws-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  border: 0;
+  background: transparent;
+  color: #b6c2d9;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.ws-tool:hover {
+  background: rgba(148, 163, 184, 0.14);
+  color: #eef2fa;
+}
+
+.ws-tool.is-active {
+  background: rgba(47, 129, 247, 0.26);
+  color: #f4efff;
+  box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.55);
+}
+
+.ws-tool[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ws-tool--accent {
+  background: linear-gradient(135deg, #1e5fc4, #2f81f7);
+  color: #fff;
+  box-shadow: 0 4px 12px -8px rgba(15, 16, 18, 0.7);
+}
+
+.ws-tool--accent:hover {
+  background: linear-gradient(135deg, #2f81f7, #4aa0ff);
+}
+
+/* A panel button names what it drives, so the button reads as the part. */
+.ws-tool span {
+  white-space: nowrap;
+}
+
+/* --- stage overlays ------------------------------------------------------ */
+
+.ws-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  justify-items: center;
+  color: #9fb0cc;
+  font-size: 13px;
+  background: rgba(5, 7, 12, 0.7);
+  z-index: 2;
+}
+
+.ws-loading[hidden] {
+  display: none;
+}
+
+.ws-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(148, 163, 184, 0.28);
+  border-top-color: #a78bfa;
+  animation: ws-spin 0.85s linear infinite;
+}
+
+@keyframes ws-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ws-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(9, 13, 21, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: #93a3bd;
+  font-size: 12px;
+  max-width: calc(100% - 32px);
+  text-align: center;
+  z-index: 3;
+  backdrop-filter: blur(8px);
+}
+
+.ws-case-label {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(9, 13, 21, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: #cdd8ea;
+  font-size: 11.5px;
+  font-weight: 600;
+  z-index: 3;
+}
+
+/* --- inspect card -------------------------------------------------------- */
+
+.ws-inspect {
+  position: absolute;
+  right: 12px;
+  top: 60px;
+  width: 232px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(9, 13, 21, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 24px 50px -26px rgba(0, 0, 0, 0.9);
+  color: #d7e0ee;
+  z-index: 4;
+  backdrop-filter: blur(12px);
+}
+
+.ws-inspect[hidden] {
+  display: none;
+}
+
+.ws-inspect p.ws-inspect__eyebrow {
+  margin: 0 0 4px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8b9cb8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ws-inspect h3 {
+  margin: 0 0 10px;
+  font-size: 14.5px;
+  line-height: 1.3;
+  color: #f2f6ff;
+}
+
+.ws-inspect dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 10px;
+  font-size: 12px;
+}
+
+.ws-inspect dt {
+  color: #8b9cb8;
+}
+
+.ws-inspect dd {
+  margin: 0;
+  text-align: right;
+  color: #e6edf8;
+  overflow-wrap: anywhere;
+}
+
+.ws-inspect__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 11px;
+}
+
+.ws-inspect__actions .btn {
+  flex: 1 1 0;
+}
+
+/* --- guided assembly rail ------------------------------------------------ */
+
+.ws-card--steps {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ws-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ws-step {
+  border-radius: 9px;
+  border: 1px solid transparent;
+}
+
+.ws-step.is-current {
+  border-color: rgba(245, 165, 36, 0.42);
+  background: rgba(245, 165, 36, 0.08);
+}
+
+.ws-step__row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: none;
+  border: 0;
+  color: #c3cfe3;
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.ws-step__row:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #f0f5ff;
+}
+
+.ws-step__dot {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #8b9cb8;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+}
+
+.ws-step.is-done .ws-step__dot {
+  color: #052e16;
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+.ws-step.is-current .ws-step__dot {
+  color: #231403;
+  background: #f5a524;
+  border-color: #f5a524;
+}
+
+.ws-step.is-done .ws-step__title {
+  color: #8b9cb8;
+  text-decoration: line-through;
+  text-decoration-color: rgba(139, 156, 184, 0.5);
+}
+
+.ws-step.is-current .ws-step__title {
+  color: #ffd79a;
+  font-weight: 650;
+}
+
+.ws-step__open {
+  padding: 0 8px 9px 34px;
+}
+
+.ws-step__ask,
+.ws-step__why,
+.ws-step__wait {
+  margin: 0 0 5px;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.ws-step__ask {
+  color: #d7e0ee;
+}
+
+.ws-step__why {
+  color: #93a4be;
+}
+
+.ws-step__wait {
+  margin: 7px 0 0;
+  color: #f5a524;
+}
+
+.ws-step__specs {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 9px;
+  margin: 6px 0 0;
+  font-size: 11px;
+}
+
+.ws-step__specs dt {
+  color: #8194ae;
+}
+
+.ws-step__specs dd {
+  margin: 0;
+  color: #cad6e6;
+  text-align: right;
+}
+
+.ws-part.is-early {
+  opacity: 0.55;
+}
+
+.ws-part.is-early .ws-part__go {
+  color: #93a4be;
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+/* --- side column --------------------------------------------------------- */
+
+.ws-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.ws-card {
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(13, 18, 28, 0.86);
+  padding: 13px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ws-card--inventory {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ws-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ws-card__head h2 {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a9b8d2;
+}
+
+.ws-card__head span {
+  font-size: 11.5px;
+  color: #8496b2;
+}
+
+.ws-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.ws-progress__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2f81f7, #4aa0ff);
+  transition: width 0.3s ease;
+}
+
+.ws-tablist {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.ws-tab {
+  padding: 5px 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(17, 24, 38, 0.7);
+  color: #93a3bd;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ws-tab.is-active {
+  background: rgba(47, 129, 247, 0.22);
+  border-color: rgba(167, 139, 250, 0.6);
+  color: #f0eaff;
+}
+
+.ws-tab .ws-tab__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: #f59e0b;
+  vertical-align: middle;
+}
+
+/* Inventory parts are draggable; each carries its own drag payload. */
+.ws-inventory {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 2px;
+}
+
+.ws-part {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px;
+  border-radius: 11px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: linear-gradient(180deg, rgba(23, 31, 46, 0.92), rgba(16, 22, 34, 0.92));
+  cursor: grab;
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+
+.ws-part:hover {
+  border-color: rgba(167, 139, 250, 0.55);
+  transform: translateY(-1px);
+}
+
+.ws-part.is-installed {
+  opacity: 0.55;
+  cursor: default;
+  border-style: dashed;
+}
+
+.ws-part.is-dragging {
+  opacity: 0.35;
+}
+
+.ws-part__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgba(47, 129, 247, 0.16);
+  color: #c4b5fd;
+}
+
+.ws-part__copy {
+  min-width: 0;
+}
+
+.ws-part__copy strong {
+  display: block;
+  font-size: 12.5px;
+  color: #eaf0fb;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-part__copy span {
+  display: block;
+  font-size: 11px;
+  color: #8b9cb8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-part__go {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 0;
+  background: rgba(56, 189, 248, 0.14);
+  color: #8cd8fb;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ws-part.is-installed .ws-part__go {
+  background: rgba(74, 222, 128, 0.14);
+  color: #86efac;
+}
+
+.ws-empty {
+  padding: 18px 10px;
+  text-align: center;
+  color: #8496b2;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* --- cable list ---------------------------------------------------------- */
+
+.ws-cables {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ws-cable {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 9px;
+  background: rgba(17, 24, 38, 0.62);
+  border: 1px solid rgba(56, 189, 248, 0.16);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ws-cable:hover {
+  border-color: rgba(56, 189, 248, 0.42);
+}
+
+.ws-cable.is-plugged {
+  border-color: rgba(74, 222, 128, 0.34);
+  background: rgba(22, 39, 32, 0.55);
+}
+
+.ws-cable.is-armed {
+  border-color: rgba(245, 165, 36, 0.75);
+  background: rgba(58, 40, 12, 0.6);
+  box-shadow: 0 0 0 1px rgba(245, 165, 36, 0.3) inset;
+}
+
+.ws-cable__mark {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.14);
+}
+
+.ws-cable.is-plugged .ws-cable__mark {
+  color: #86efac;
+  background: rgba(74, 222, 128, 0.2);
+}
+
+.ws-cable__copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ws-cable__copy strong {
+  font-size: 12px;
+  font-weight: 600;
+  color: #dbe4f3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ws-cable__copy span {
+  font-size: 10.5px;
+  color: #8496b2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ws-cable__go {
+  border: 1px solid rgba(56, 189, 248, 0.34);
+  background: rgba(56, 189, 248, 0.12);
+  color: #7dd3fc;
+  border-radius: 7px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ws-cable.is-plugged .ws-cable__go {
+  border-color: rgba(74, 222, 128, 0.32);
+  background: rgba(74, 222, 128, 0.14);
+  color: #86efac;
+}
+
+.ws-cable__hint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #8b9cb8;
+}
+
+.ws-progress__fill--cable {
+  background: linear-gradient(90deg, #38bdf8, #22c55e);
+}
+
+/* --- bay list ------------------------------------------------------------ */
+
+.ws-bays {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ws-bay {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 9px;
+  background: rgba(17, 24, 38, 0.62);
+  border: 1px solid transparent;
+  font-size: 12px;
+}
+
+.ws-bay.is-filled {
+  border-color: rgba(74, 222, 128, 0.32);
+  background: rgba(22, 39, 32, 0.55);
+}
+
+.ws-bay.is-empty {
+  border-color: rgba(148, 163, 184, 0.18);
+  border-style: dashed;
+}
+
+.ws-bay__mark {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.ws-bay.is-filled .ws-bay__mark {
+  background: rgba(74, 222, 128, 0.2);
+  color: #86efac;
+}
+
+.ws-bay.is-empty .ws-bay__mark {
+  background: rgba(148, 163, 184, 0.16);
+  color: #93a3bd;
+}
+
+.ws-bay__label {
+  color: #b8c6dd;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-bay__item {
+  grid-column: 2 / -1;
+  color: #eef3fb;
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-bay__empty {
+  color: #7f90ac;
+  font-size: 11px;
+  font-style: italic;
+}
+
+/* --- drag-to-bench drop notice ------------------------------------------- */
+
+.ws-dropveil {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: none;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  border-radius: inherit;
+  background: rgba(12, 18, 30, 0.72);
+  border: 2px dashed rgba(167, 139, 250, 0.6);
+  color: #e6dcff;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: center;
+  padding: 20px;
+  pointer-events: none;
+}
+
+.ws-viewport.is-dropping .ws-dropveil {
+  display: grid;
+}
+
+.ws-dropveil span {
+  font-weight: 500;
+  font-size: 12px;
+  color: #b9a8e8;
+  max-width: 260px;
+}
+
+@media (max-width: 1080px) {
+  .ws-stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(280px, 1fr) auto;
+    min-height: 0;
+  }
+
+  .workshop-page {
+    height: auto;
+  }
+
+  .ws-viewport {
+    min-height: 420px;
+  }
+
+  .ws-side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .ws-inventory {
+    max-height: 230px;
+  }
+}
+
+@media (max-width: 720px) {
+  .ws-toolbar {
+    position: static;
+    padding: 10px 10px 0;
+    justify-content: flex-start;
+  }
+
+  .ws-viewport .ws-toolbar {
+    position: absolute;
+    padding: 0;
+  }
+
+  .ws-tool span {
+    display: none;
+  }
+
+  .ws-tool {
+    padding: 7px;
+  }
+
+  .ws-tool--accent span {
+    display: inline;
+  }
+
+  .ws-hint {
+    display: none;
+  }
+}
+
+/* --- drag targeting, fps badge ------------------------------------------- */
+
+/* The halo follows the pointer while a part is carried, so the bay the part
+   belongs in is something you aim at rather than guess. */
+.ws-baydrop {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -50%) scale(0.86);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ws-baydrop.is-on {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.ws-baydrop.is-snap {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.22);
+  transition: opacity 320ms ease, transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ws-baydrop__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px dashed var(--drop-tint, #38bdf8);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.16), rgba(56, 189, 248, 0));
+  box-shadow: 0 0 0 4px rgba(9, 13, 21, 0.35), 0 0 22px rgba(56, 189, 248, 0.28);
+  animation: wsDropSpin 9s linear infinite;
+}
+
+.ws-baydrop.is-bad .ws-baydrop__ring {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.16), rgba(245, 158, 11, 0));
+  box-shadow: 0 0 0 4px rgba(9, 13, 21, 0.35), 0 0 22px rgba(245, 158, 11, 0.3);
+}
+
+@keyframes wsDropSpin {
+  to { transform: rotate(360deg); }
+}
+
+.ws-baydrop__text {
+  position: relative;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: #e7f2ff;
+  background: rgba(9, 13, 21, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.ws-baydrop.is-bad .ws-baydrop__text {
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #ffe4bc;
+}
+
+/* A live frame rate, because the spec asks for 60 FPS on capable hardware and
+   that claim should be checkable without opening developer tools. */
+.ws-fps {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #9fd6a6;
+  background: rgba(9, 13, 21, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.ws-fps.is-mid { color: #f6d58a; }
+.ws-fps.is-low { color: #f8a3a3; }
+
+@media (max-width: 720px) {
+  .ws-baydrop__text { font-size: 10px; }
+  .ws-fps { bottom: 8px; right: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-baydrop__ring { animation: none; }
+}

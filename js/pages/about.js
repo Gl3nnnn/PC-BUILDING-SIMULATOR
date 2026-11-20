@@ -46,7 +46,7 @@ const FAQ = [
   },
   {
     q: 'Where are my builds stored?',
-    a: 'In your browser using localStorage. There is no account, backend, or database. Clearing site data removes local builds, so use Export JSON or PDF for anything you want to keep. Share links encode the build into the URL — the data is only decoded in the recipient’s browser.',
+    a: 'In your browser. Saved builds live in IndexedDB, a small database the browser keeps for this site, with a version history per build. Career, lessons, achievements and preferences use localStorage. There is no account, backend, or server. Clearing site data removes all of it, so use Data & Storage to back up. Share links encode the build into the URL itself, so the parts travel inside the link.',
   },
   {
     q: 'Does the 3D view show the real products?',
@@ -121,7 +121,7 @@ export function render(root) {
               <span class="tech-chip">JavaScript ES6+</span>
               <span class="tech-chip">ES Modules</span>
               <span class="tech-chip">Three.js r160</span>
-              <span class="tech-chip">localStorage</span>
+              <span class="tech-chip">IndexedDB</span>
               <span class="tech-chip">Hash routing</span>
               <span class="tech-chip">No build step</span>
             </div>

@@ -12,6 +12,7 @@ const CATEGORY_COLORS = {
   case: '#8b5cf6',
   cooler: '#22d3ee',
   fans: '#f472b6',
+  cables: '#94a3b8',
 };
 
 /* Real chassis finishes, matching the maker's own palette in the 3D
@@ -60,6 +61,10 @@ const BRAND_COLORS = {
   FSP: '#f59e0b',
   'ID-COOLING': '#10b981',
   Jonsbo: '#8b5cf6',
+  MSI: '#ff3d71',
+  Sapphire: '#2563eb',
+  PowerColor: '#dc2626',
+  StarTech: '#eab308',
 };
 
 function shade(hex, amount) {
@@ -483,6 +488,23 @@ function fanArt(accent, item) {
   `;
 }
 
+function cableArt(accent, item) {
+  const spec = item?.specs || {};
+  const rgb = Boolean(spec.rgb);
+  const wires = Array.from({ length: 3 }, (_, index) => `
+    <path d="M84 ${76 + index * 22}q48 -26 74 0t76 0" fill="none" stroke="${rgb ? accent : '#3c4557'}" stroke-width="7" stroke-linecap="round" opacity="${rgb ? 0.85 : 1}"/>`).join('');
+  return `
+    <g>
+      <rect x="54" y="56" width="34" height="46" rx="6" fill="url(#metal)" stroke="rgba(255,255,255,0.16)"/>
+      <path d="M60 68h22M60 80h22M60 92h22" stroke="${accent}" stroke-width="2" opacity="0.7"/>
+      ${wires}
+      <rect x="222" y="62" width="46" height="40" rx="5" fill="#171e2c" stroke="${accent}" stroke-width="2"/>
+      <path d="M232 74h26M232 84h26M232 94h18" stroke="#c7cfdd" stroke-width="3"/>
+    </g>
+    <text x="160" y="176" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" letter-spacing="2.5" fill="${accent}" opacity="0.8">${(spec.type || 'CABLE').toUpperCase()}</text>
+  `;
+}
+
 function fallbackArt(accent) {
   return `
     <rect x="110" y="55" width="100" height="90" rx="8" fill="url(#metal)" stroke="${accent}" stroke-opacity="0.4"/>
@@ -512,6 +534,7 @@ export function productArt(item, options = {}) {
   else if (category === 'case') inner = caseArt(accent, item, id);
   else if (category === 'cooler') inner = coolerArt(accent, item);
   else if (category === 'fans') inner = fanArt(accent, item);
+  else if (category === 'cables') inner = cableArt(accent, item);
   else inner = fallbackArt(accent);
   inner = inner.replaceAll('url(#metal)', `url(#artmetal${id})`).replaceAll('url(#accent)', `url(#artaccent${id})`);
 

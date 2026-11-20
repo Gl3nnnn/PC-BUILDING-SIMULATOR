@@ -2,6 +2,7 @@ import { getHardware, itemsByCategory } from '../data/hardware.js';
 import { store } from '../core/store.js';
 import { getItems } from '../core/build.js';
 import { estimatePerformance, performanceVerdict, RESOLUTIONS, QUALITY } from '../core/perf.js';
+import { simulateThermals, FORMULA_NOTES } from '../core/thermal.js';
 import { analyzeBuild } from '../core/intelligence.js';
 import { escapeHtml, peso } from '../core/format.js';
 import { icon } from '../ui/icons.js';
@@ -73,6 +74,96 @@ function currentBuildIntelligence(state) {
         ? `<div class="upgrade-grid">${upgrades.map(({ entry, kind }) => upgradeCard(entry, kind)).join('')}</div>`
         : `<p class="upgrade-empty">${icon('check', 14)} No obvious upgrade is needed within the current case and PSU constraints.</p>`}
       ${intel.bottleneck ? `<p class="perf-footnote">${icon('info', 13)} ${escapeHtml(intel.bottleneck.detail)}</p>` : ''}
+    </section>
+  `;
+}
+
+function meterTone(value, warnAt, errorAt) {
+  if (value >= errorAt) return 'error';
+  if (value >= warnAt) return 'warn';
+  return 'ok';
+}
+
+function thermalPanel() {
+  const sim = simulateThermals(store.getCurrent());
+  if (!sim.ready) {
+    return `
+      <section class="thermal-panel">
+        <div class="games-head">
+          <h2>${icon('psu', 16)} Power &amp; thermal simulation</h2>
+        </div>
+        <p class="thermal-empty">${icon('info', 14)} Add ${escapeHtml(sim.missing.join(', '))} to your build to simulate power draw, temperatures and airflow.</p>
+      </section>
+    `;
+  }
+
+  const p = sim.power;
+  const t = sim.thermals;
+  const a = sim.airflow;
+  const headroomTone = p.headroomPct === null ? 'ok' : meterTone(-p.headroomPct, -25, 0);
+  const cpuTone = t.cpuTemp === null ? 'ok' : meterTone(t.cpuTemp, 85, 95);
+  const gpuTone = t.gpuTemp === null ? 'ok' : meterTone(t.gpuTemp, 78, 83);
+
+  return `
+    <section class="thermal-panel">
+      <div class="games-head">
+        <h2>${icon('psu', 16)} Power &amp; thermal simulation</h2>
+        <span>${icon('info', 13)} Live from your current build</span>
+      </div>
+      <div class="thermal-verdict thermal-verdict--${sim.verdict.tone}">
+        <strong>${escapeHtml(sim.verdict.title)}</strong>
+        <p>${escapeHtml(sim.verdict.detail)}</p>
+      </div>
+      <div class="thermal-stats">
+        <div class="thermal-stat">
+          <span>${icon('psu', 14)} System load</span>
+          <strong>${p.loadWatts} W</strong>
+          <em>${p.idleWatts} W idle · CPU ${p.cpuWatts} W · GPU ${p.gpuWatts} W</em>
+        </div>
+        <div class="thermal-stat thermal-stat--${headroomTone}">
+          <span>${icon('bolt', 14)} PSU headroom</span>
+          <strong>${p.headroomPct === null ? '—' : `${p.headroomPct}%`}</strong>
+          <em>${p.psuWatts ? `${p.psuWatts} W ${p.efficiency || ''}` : 'No power supply'} · ${p.recommendedPsu} W suggested</em>
+        </div>
+        <div class="thermal-stat thermal-stat--${cpuTone}">
+          <span>${icon('cooler', 14)} CPU temperature</span>
+          <strong>${t.cpuTemp === null ? '—' : `${t.cpuTemp} °C`}</strong>
+          <em>Cooler rated ${t.coolerRated} W · limiter ${t.cpuLimit} °C${t.cpuCapped ? ' · held at its safety cap' : ''}</em>
+        </div>
+        <div class="thermal-stat thermal-stat--${gpuTone}">
+          <span>${icon('gpu', 14)} GPU temperature</span>
+          <strong>${t.gpuTemp === null ? 'Integrated' : `${t.gpuTemp} °C`}</strong>
+          <em>${t.gpuTemp === null ? 'No dedicated card, so no card temperature' : `Card limiter ${t.gpuLimit} °C · room ${t.ambientC} °C${t.gpuCapped ? ' · held at its safety cap' : ''}`}</em>
+        </div>
+      </div>
+      <div class="thermal-bars">
+        <div class="thermal-bar">
+          <div class="thermal-bar-head"><span>${icon('fan', 13)} Case airflow</span><strong>${a.effectiveCfm} CFM effective</strong></div>
+          <div class="thermal-track"><span style="width:${Math.min(100, (a.effectiveCfm / 150) * 100)}%"></span></div>
+          <p>${a.fanCount} fans · ${a.rawCfm} CFM raw · ${a.frontPanel || 'panel'} front caps it at ${Math.round(a.panelFactor * 100)}%</p>
+        </div>
+        <div class="thermal-bar">
+          <div class="thermal-bar-head"><span>${icon('chart', 13)} Cooling efficiency</span><strong>${a.score} / 100</strong></div>
+          <div class="thermal-track"><span style="width:${a.score}%"></span></div>
+          <p>${a.perWatt} CFM per watt of heat · air warms ${t.airRiseC === null ? '—' : `${t.airRiseC} °C`} passing through the case</p>
+        </div>
+        <div class="thermal-bar">
+          <div class="thermal-bar-head"><span>${icon('fan', 13)} Fan speed</span><strong>${t.fanPwm}% PWM</strong></div>
+          <div class="thermal-track"><span style="width:${t.fanPwm}%"></span></div>
+          <p>${t.fanRpmLow}–${t.fanRpmHigh} RPM at load${t.noiseDba ? ` · about ${t.noiseDba} dBA` : ''}</p>
+        </div>
+      </div>
+      <div class="thermal-throttle thermal-throttle--${sim.throttle.any ? 'warn' : 'ok'}">
+        <strong>${sim.throttle.any ? 'Thermal throttling detected' : 'No throttling at full load'}</strong>
+        <p>${sim.throttle.any
+          ? `CPU loses about ${sim.throttle.cpuLossPct}% and the graphics card about ${sim.throttle.gpuLossPct}% of their clock speed when held at these temperatures.`
+          : 'Both the CPU and graphics card stay under their thermal limits, so clocks hold steady.'}</p>
+      </div>
+      <details class="perf-explainer thermal-formulas">
+        <summary>${icon('info', 15)} How the simulation is calculated ${icon('chevronDown', 14)}</summary>
+        ${FORMULA_NOTES.map(([label, text]) => `<p><strong>${escapeHtml(label)}:</strong> ${escapeHtml(text)}</p>`).join('')}
+        <p class="thermal-formula-foot">These are planning formulas, not measurements. Real temperatures depend on your room, dust, thermal paste, and the exact card or chip model.</p>
+      </details>
     </section>
   `;
 }
@@ -262,6 +353,7 @@ export function render(root) {
       </div>
       <div class="games-grid">${result.games.map(gameCard).join('')}</div>
       <p class="perf-footnote">${icon('info', 13)} Estimates assume a healthy system with current drivers, adequate cooling, and no severe background load. Upscaling (DLSS/FSR/XeSS) and frame generation are excluded.</p>
+      ${thermalPanel()}
       ${currentBuildIntelligence(state)}
     `;
   }

@@ -17,7 +17,7 @@
   padding: 17px;
   border: 1px solid var(--line);
   border-radius: 15px;
-  background: linear-gradient(165deg, rgba(16, 23, 40, 0.62), rgba(8, 12, 21, 0.52));
+  background: linear-gradient(165deg, rgba(38, 40, 45, 0.62), rgba(28, 30, 34, 0.52));
 }
 
 .perf-panel-head {
@@ -153,9 +153,9 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 90% 0%, rgba(168, 85, 247, 0.13), transparent 42%),
-    radial-gradient(circle at 0% 100%, rgba(109, 140, 255, 0.1), transparent 44%),
-    linear-gradient(160deg, rgba(16, 23, 40, 0.72), rgba(8, 12, 21, 0.62));
+    radial-gradient(circle at 90% 0%, rgba(47, 129, 247, 0.13), transparent 42%),
+    radial-gradient(circle at 0% 100%, rgba(47, 129, 247, 0.1), transparent 44%),
+    linear-gradient(160deg, rgba(38, 40, 45, 0.72), rgba(28, 30, 34, 0.62));
   overflow: hidden;
 }
 
@@ -166,7 +166,7 @@
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(109, 140, 255, 0.2), transparent 70%);
+  background: radial-gradient(circle, rgba(47, 129, 247, 0.2), transparent 70%);
   pointer-events: none;
 }
 
@@ -353,7 +353,7 @@
   padding: 15px;
   border: 1px solid var(--line);
   border-radius: 13px;
-  background: linear-gradient(165deg, rgba(16, 23, 40, 0.55), rgba(8, 12, 21, 0.48));
+  background: linear-gradient(165deg, rgba(38, 40, 45, 0.55), rgba(28, 30, 34, 0.48));
   overflow: hidden;
 }
 
@@ -526,7 +526,7 @@
 .perf-intel .intel-card {
   padding: 15px;
   border-radius: 13px;
-  background: linear-gradient(165deg, rgba(16, 23, 40, 0.55), rgba(8, 12, 21, 0.48));
+  background: linear-gradient(165deg, rgba(38, 40, 45, 0.55), rgba(28, 30, 34, 0.48));
 }
 
 .perf-intel .intel-card strong {
@@ -576,7 +576,7 @@
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: linear-gradient(165deg, rgba(16, 23, 40, 0.55), rgba(8, 12, 21, 0.48));
+  background: linear-gradient(165deg, rgba(38, 40, 45, 0.55), rgba(28, 30, 34, 0.48));
 }
 
 .upgrade-head {

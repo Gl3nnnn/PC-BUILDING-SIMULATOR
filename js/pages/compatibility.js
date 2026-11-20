@@ -45,6 +45,43 @@ function partsChips(check) {
   return `<div class="check-parts">${chips}</div>`;
 }
 
+function ruleGrid(result) {
+  if (!result.rules?.length) return '';
+  const counts = {
+    compatible: result.rules.filter((rule) => rule.verdict === 'compatible').length,
+    warning: result.rules.filter((rule) => rule.verdict === 'warning').length,
+    incompatible: result.rules.filter((rule) => rule.verdict === 'incompatible').length,
+    unchecked: result.rules.filter((rule) => rule.verdict === 'unchecked').length,
+  };
+  return `
+    <section class="compat-section rule-verdicts">
+      <div class="compat-section-head">
+        <h2>${icon('shield', 18)}<span>Rule-by-rule verdicts</span><em class="count-badge count-badge--warn">${counts.incompatible + counts.warning}</em></h2>
+      </div>
+      <div class="rule-verdict-grid">
+        ${result.rules.map((rule) => `
+          <details class="rule-verdict rule-verdict--${rule.tone}">
+            <summary>
+              <span class="rule-verdict-icon">${icon(rule.icon, 14)}</span>
+              <span class="rule-verdict-label">${escapeHtml(rule.label)}</span>
+              <span class="rule-verdict-state">${escapeHtml(rule.state)}</span>
+            </summary>
+            ${rule.findings.length
+              ? `<ul class="rule-verdict-findings">${rule.findings.map((finding) => `<li class="finding finding--${finding.level}"><strong>${escapeHtml(finding.title)}</strong><p>${escapeHtml(finding.detail)}</p></li>`).join('')}</ul>`
+              : '<p class="rule-verdict-empty">No part combination covered by this rule is selected yet.</p>'}
+          </details>
+        `).join('')}
+      </div>
+      <div class="compat-legend">
+        <span class="legend-item"><span class="legend-dot legend-dot--ok"></span>Compatible ${counts.compatible}</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--warn"></span>Warning ${counts.warning}</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--error"></span>Incompatible ${counts.incompatible}</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--info"></span>Not checked ${counts.unchecked}</span>
+      </div>
+    </section>
+  `;
+}
+
 function checkCard(check) {
   const meta = LEVEL_META[check.level] || LEVEL_META.info;
   return `
@@ -146,6 +183,8 @@ function renderBody(container) {
     </div>
 
     ${missingHTML}
+
+    ${ruleGrid(result)}
 
     ${section('Blocking issues', result.errors, 'x', 'error')}
     ${section('Warnings & verification', result.warnings, 'alert', 'warn')}

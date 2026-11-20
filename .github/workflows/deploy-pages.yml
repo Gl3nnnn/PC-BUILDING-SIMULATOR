@@ -27,6 +27,11 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      # Fails the deploy on an absolute path, a missing file, a bare import or a
+      # service worker entry that points at nothing, instead of shipping it.
+      - name: Check the site works from a subfolder
+        run: node scripts/check-pages.mjs
+
       - name: Stage static site
         run: |
           mkdir _site

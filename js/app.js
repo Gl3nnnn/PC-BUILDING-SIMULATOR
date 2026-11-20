@@ -1,6 +1,6 @@
 import { PRESETS, PRESETS_BY_ID } from './data/presets.js';
 import { getHardware } from './data/hardware.js';
-import { store, on } from './core/store.js';
+import { store, on, initLibrary } from './core/store.js';
 import { loadPrices } from './core/prices.js';
 import { buildFromFile, buildTotal, decodeBuild, getIds, sanitizeBuild, selectedCount } from './core/build.js';
 import { evaluateBuild } from './core/compat.js';
@@ -22,24 +22,39 @@ import { render as renderCompatibility } from './pages/compatibility.js';
 import { render as renderPerformance } from './pages/performance.js';
 import { render as renderVisualizer } from './pages/visualizer.js';
 import { render as renderSaved } from './pages/saved.js';
+import { render as renderData } from './pages/data.js';
 import { render as renderShowcase } from './pages/showcase.js';
 import { render as renderAbout } from './pages/about.js';
 import { render as renderCareer } from './pages/career.js';
+import { render as renderWorkshop } from './pages/workshop.js';
+import { render as renderBoot } from './pages/boot.js';
+import { render as renderBenchmark } from './pages/benchmark.js';
 import { render as renderRepair } from './pages/repair.js';
+import { render as renderLearn } from './pages/learn.js';
+import { getActiveModeId, setActiveMode } from './core/mode.js';
+import { hydrateModeSwitch } from './ui/modebar.js';
 import { initialiseLanguage, onSettings } from './core/settings.js';
 import { onCurrencyChange } from './core/currency.js';
 import { sfx, unlockAudio } from './core/audio.js';
+import { record } from './core/achievements.js';
 
 const PAGES = {
   home: { title: 'PC Building Simulator', render: renderHome },
   career: { title: 'Career Mode', render: renderCareer },
+  workshop: { title: '3D PC Workshop', render: renderWorkshop },
+  boot: { title: 'BIOS & Boot System', render: renderBoot },
+  benchmark: { title: 'Benchmark Dashboard', render: renderBenchmark },
   repair: { title: 'Repair Bench', render: renderRepair },
+  learn: { title: 'Learning Mode', render: renderLearn },
   builder: { title: 'PC Builder', render: renderBuilder },
   database: { title: 'Hardware Database', render: renderDatabase },
   compatibility: { title: 'Compatibility Checker', render: renderCompatibility },
   performance: { title: 'Performance Estimator', render: renderPerformance },
   visualizer: { title: '3D Visualizer', render: renderVisualizer },
-  saved: { title: 'Saved Builds', render: renderSaved },
+  saved: { title: 'My Builds', render: renderSaved },
+  builds: { title: 'My Builds', render: renderSaved },
+  data: { title: 'Settings', render: renderData },
+  settings: { title: 'Settings', render: renderData },
   showcase: { title: 'Build Showcase', render: renderShowcase },
   about: { title: 'About', render: renderAbout },
 };
@@ -146,6 +161,7 @@ function renderRoute() {
 
   updateHeader();
   updateNav(routeName);
+  hydrateModeSwitch(HEADER);
   setDocumentTitle(routeName);
   window.scrollTo(0, 0);
 }
@@ -257,7 +273,7 @@ function openSaveDialog() {
           <span>${icon('cpu', 14)} ${count} component${count === 1 ? '' : 's'}</span>
           <span>${icon('money', 14)} ${peso(total)}</span>
         </div>
-        <p class="form-hint">${icon('lock', 13)} Saved with localStorage on this device. Export a JSON or PDF copy for long-term keeping.</p>
+        <p class="form-hint">${icon('lock', 13)} Saved to your local build library in this browser. Back it up any time from Data &amp; Storage.</p>
       </form>
     `,
     footer: `
@@ -268,6 +284,12 @@ function openSaveDialog() {
   });
 
   const form = overlay.querySelector('#save-build-form');
+  // Select the existing name so typing replaces it instead of appending to it.
+  const nameInput = overlay.querySelector('#save-build-name');
+  if (nameInput) {
+    nameInput.focus();
+    nameInput.select();
+  }
   const commit = (asCopy) => {
     const name = overlay.querySelector('#save-build-name')?.value || '';
     if (!name.trim()) {
@@ -459,7 +481,8 @@ const actionHandlers = {
   'save-build'() {
     openSaveDialog();
   },
-  'share-build'() {
+  'share-build'(button) {
+    if (selectedCount(store.getCurrent()) > 0) record('shares');
     openShareDialog(store.getCurrent());
   },
   'copy-share'() {
@@ -488,6 +511,7 @@ const actionHandlers = {
       toast('Add components before exporting a PDF summary.', 'warn');
       return;
     }
+    record('exportsReport');
     printBuildSummary(store.getCurrent());
   },
   'reset-build'() {
@@ -504,6 +528,7 @@ const actionHandlers = {
   },
   'add-component'(button) {
     const result = store.addComponent(button.dataset.category, button.dataset.id);
+    if (result.action === 'added' || result.action === 'replaced') record('swaps');
     notifyComponentResult(result);
     syncProductButtons(document, store.getCurrent());
   },
@@ -526,6 +551,7 @@ const actionHandlers = {
     const entry = store.getSavedById(button.dataset.id);
     if (!entry) return;
     if (store.loadSavedBuild(button.dataset.id)) {
+      record('loads');
       toast(`${entry.name} loaded into the builder.`, 'success');
       goBuilder();
     }
@@ -549,21 +575,38 @@ const actionHandlers = {
   },
   'duplicate-saved'(button) {
     const copy = store.duplicateSaved(button.dataset.id);
-    if (copy) toast(`Created “${copy.name}”.`, 'success');
+    if (copy) {
+      record('duplicates');
+      toast(`Created “${copy.name}”.`, 'success');
+    }
   },
   'share-saved'(button) {
     const entry = store.getSavedById(button.dataset.id);
     if (!entry) return;
+    record('shares');
     openShareDialog(sanitizeBuild(entry, entry.name));
   },
+  'open-data'() {
+    location.hash = '#/data';
+  },
   'pdf-saved'(button) {
+    record('exportsReport');
     exportSavedToPDF(button.dataset.id);
   },
   'export-saved'(button) {
     const entry = store.getSavedById(button.dataset.id);
     if (!entry) return;
+    record('exportsJson');
     exportBuildJSON(sanitizeBuild(entry, entry.name));
     toast('Build exported as JSON.', 'success');
+  },
+  'set-mode'(button) {
+    const mode = button.dataset.mode;
+    if (!mode) return;
+    setActiveMode(mode);
+    hydrateModeSwitch(HEADER);
+    const destination = { free: '#/builder', career: '#/career', learn: '#/learn' }[mode];
+    if (destination && location.hash !== destination) location.hash = destination;
   },
   'clear-saved'() {
     confirmDialog({
@@ -635,11 +678,15 @@ document.addEventListener('keydown', (event) => {
     const destinations = {
       h: '#/home',
       b: '#/builder',
+      w: '#/workshop',
+      m: '#/benchmark',
+      l: '#/learn',
       d: '#/database',
       v: '#/visualizer',
       p: '#/performance',
       c: '#/compatibility',
       s: '#/saved',
+      g: '#/data',
     };
     const destination = destinations[event.key.toLowerCase()];
     goPrefixAt = 0;
@@ -667,6 +714,7 @@ const yearEl = document.querySelector('#footer-year');
 if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
 await loadPrices();
+await initLibrary();
 compare.init();
 initialiseLanguage();
 renderRoute();

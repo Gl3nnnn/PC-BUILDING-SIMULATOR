@@ -105,11 +105,28 @@ export const SPEC_SCHEMA = {
     { label: 'RGB lighting', value: (s) => (s.rgb ? 'Yes' : 'No') },
     { label: 'Connector', value: (s) => s.connector },
   ],
+  cables: [
+    { label: 'Cable type', value: (s) => s.type },
+    { label: 'Length', value: (s) => `${s.length} mm` },
+    { label: 'Wire gauge', value: (s) => s.gauge },
+    { label: 'From', value: (s) => s.connectorA },
+    { label: 'To', value: (s) => s.connectorB },
+    { label: 'Power rating', value: (s) => s.rating },
+    { label: 'Sleeved', value: (s) => (s.sleeved ? 'Yes' : 'No') },
+    { label: 'RGB lighting', value: (s) => (s.rgb ? 'Yes' : 'No') },
+  ],
 };
+
+// Every part lists how big it is and how much power it draws, whatever its category.
+const PHYSICAL_ROWS = [
+  { label: 'Dimensions (L × W × H)', value: (s) => (Array.isArray(s.dimensions) ? `${s.dimensions.join(' × ')} mm` : null) },
+  { label: 'Power draw', value: (s) => (Number.isFinite(Number(s.power)) ? (Number(s.power) > 0 ? `${s.power} W` : 'None (passive)') : null) },
+  { label: 'Weight', value: (s) => (Number.isFinite(Number(s.weight)) ? `${s.weight} kg` : null) },
+];
 
 export function specRows(item) {
   if (!item) return [];
-  const schema = SPEC_SCHEMA[item.category] || [];
+  const schema = [...(SPEC_SCHEMA[item.category] || []), ...PHYSICAL_ROWS];
   return schema.map((row) => {
     let value;
     try {
@@ -144,6 +161,8 @@ export function keySpecs(item) {
       return [s.type, s.type === 'Liquid' ? `${s.radiatorSize} mm radiator` : `${s.height} mm tall`, `${s.tdp} W rated`].filter(Boolean);
     case 'fans':
       return [`${s.size} mm × ${s.count}`, `${s.airflow} CFM`, s.rgb ? 'ARGB' : 'No RGB'].filter(Boolean);
+    case 'cables':
+      return [s.type, `${s.length} mm`, s.rating].filter(Boolean);
     default:
       return [];
   }

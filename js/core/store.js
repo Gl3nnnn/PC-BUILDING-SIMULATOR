@@ -2,11 +2,16 @@ import { CATEGORIES, getHardware } from '../data/hardware.js';
 import { PRESETS_BY_ID } from '../data/presets.js';
 import { emptyBuild, sanitizeBuild, cloneBuild, getIds, selectedCount, buildTotal } from './build.js';
 import { uid } from './format.js';
+import * as library from './db.js';
 
 const CURRENT_KEY = 'pcbs.current.v1';
 const SAVED_KEY = 'pcbs.saved.v1';
 const RATINGS_KEY = 'pcbs.ratings.v1';
 const MAX_SAVED = 60;
+
+/* True once IndexedDB has handed us the library. Until then the old
+ * localStorage list is what the page shows, so the first paint is never blank. */
+let libraryReady = false;
 
 const listeners = new Map();
 let storageAvailable = true;
@@ -93,7 +98,22 @@ function persistCurrent() {
 }
 
 function persistSaved() {
+  /* While the IndexedDB library is in charge the records live there; the
+   * localStorage copy is kept only for browsers that block the database. */
+  if (libraryReady && library.isDbAvailable()) return;
   writeJSON(SAVED_KEY, saved);
+}
+
+/** Write one build into the library, best effort: a failure toasts but never
+ * stops the edit the user just made from showing on screen. */
+function mirrorSaved(entry, action) {
+  if (!library.isDbAvailable()) return;
+  library.putBuild(entry, { action }).catch((error) => emit('library-error', error));
+}
+
+function mirrorDeleted(id) {
+  if (!library.isDbAvailable()) return;
+  library.deleteBuild(id).catch((error) => emit('library-error', error));
 }
 
 function commit(reason, meta = {}) {
@@ -221,12 +241,19 @@ export const store = {
     const existing = options.updateId ? saved.find((entry) => entry.id === options.updateId) : null;
     current.name = clean;
     if (existing) {
+      const previousItems = Object.fromEntries(CATEGORIES.map((category) => [category.id, [...getIds(existing, category.id)]]));
       existing.name = clean;
       existing.items = Object.fromEntries(CATEGORIES.map((category) => [category.id, [...getIds(current, category.id)]]));
       existing.budget = current.budget;
       existing.updatedAt = now;
       current.sourceId = existing.id;
       persistSaved();
+      mirrorSaved(existing, 'updated');
+      if (libraryReady) {
+        library.addVersion(existing.id, { name: existing.name, items: previousItems, budget: existing.budget, total: null }, 'Before update')
+          .then(() => library.addVersion(existing.id, { name: existing.name, items: existing.items, budget: existing.budget, total: buildTotal(current) }, 'Updated'))
+          .catch(() => {});
+      }
       commit('save');
       emit('saved', { action: 'updated', entry: existing });
       return { action: 'updated', entry: existing };
@@ -242,6 +269,11 @@ export const store = {
     saved = [entry, ...saved].slice(0, MAX_SAVED);
     current.sourceId = entry.id;
     persistSaved();
+    mirrorSaved(entry, 'created');
+    if (libraryReady) {
+      library.addVersion(entry.id, { name: entry.name, items: entry.items, budget: entry.budget, total: buildTotal(current) }, 'First save')
+        .catch(() => {});
+    }
     commit('save');
     emit('saved', { action: 'created', entry });
     return { action: 'created', entry };
@@ -270,6 +302,7 @@ export const store = {
     }
     entry.updatedAt = new Date().toISOString();
     persistSaved();
+    mirrorSaved(entry, 'renamed');
     if (current.sourceId === id) commit('saved-rename');
     emit('saved', { action: 'updated', entry });
     return true;
@@ -280,6 +313,7 @@ export const store = {
     if (saved.length === before) return false;
     if (current.sourceId === id) current.sourceId = null;
     persistSaved();
+    mirrorDeleted(id);
     persistCurrent();
     emit('saved', { action: 'deleted', id });
     emit('build', { reason: 'saved-deleted' });
@@ -299,6 +333,7 @@ export const store = {
     };
     saved = [copy, ...saved].slice(0, MAX_SAVED);
     persistSaved();
+    mirrorSaved(copy, 'duplicated');
     emit('saved', { action: 'created', entry: copy });
     return copy;
   },
@@ -306,6 +341,7 @@ export const store = {
     saved = [];
     if (current.sourceId) current.sourceId = null;
     persistSaved();
+    if (library.isDbAvailable()) library.clearBuilds().catch((error) => emit('library-error', error));
     persistCurrent();
     emit('saved', { action: 'cleared' });
     emit('build', { reason: 'saved-cleared' });
@@ -324,6 +360,91 @@ export function cloneSavedItems(entry) {
     items[category.id] = [...(entry.items?.[category.id] || [])];
     return items;
   }, {});
+}
+
+/* ------------------------------------------------------------------ */
+/* Library boot, rollback and the cloud-ready hand-off                 */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Open the IndexedDB library, move any older localStorage builds into it, and
+ * hand the records to the store. Safe to call more than once.
+ * Resolves with a small report, never rejects: a browser that blocks IndexedDB
+ * simply keeps the localStorage list it already loaded.
+ */
+export async function initLibrary() {
+  if (!library.isDbAvailable()) return { ready: false, reason: 'IndexedDB is not available' };
+  try {
+    const migration = await library.migrateLegacy();
+    const records = await library.listBuilds();
+    if (records.length || migration.moved) {
+      saved = records.slice(0, MAX_SAVED);
+      if (current.sourceId && !saved.some((entry) => entry.id === current.sourceId)) current.sourceId = null;
+    }
+    libraryReady = true;
+    emit('saved', { reason: 'library-ready', migrated: migration.moved });
+    emit('build', { reason: 'library-ready' });
+    return { ready: true, count: saved.length, migrated: migration.moved };
+  } catch (error) {
+    libraryReady = false;
+    emit('library-error', error);
+    return { ready: false, reason: error?.message || 'The library could not be opened.' };
+  }
+}
+
+export function isLibraryReady() {
+  return libraryReady;
+}
+
+/** Rewrite a saved build from one of its stored versions. */
+export async function restoreVersion(buildId, versionId) {
+  const versions = await library.listVersions(buildId);
+  const version = versions.find((entry) => entry.id === versionId);
+  if (!version) throw new Error('That version is no longer in this build’s history.');
+  const entry = saved.find((build) => build.id === buildId);
+  if (!entry) throw new Error('That saved build has been deleted.');
+  const restored = sanitizeBuild({ items: version.items, name: entry.name, budget: version.budget }, entry.name);
+  entry.items = Object.fromEntries(CATEGORIES.map((category) => [category.id, [...getIds(restored, category.id)]]));
+  entry.budget = version.budget ?? null;
+  entry.updatedAt = new Date().toISOString();
+  persistSaved();
+  mirrorSaved(entry, 'restored');
+  if (libraryReady) {
+    await library.addVersion(entry.id, { name: entry.name, items: entry.items, budget: entry.budget, total: null }, `Rolled back to ${new Date(version.at).toLocaleString()}`).catch(() => {});
+  }
+  if (current.sourceId === buildId) {
+    current = sanitizeBuild(entry, entry.name);
+    current.sourceId = buildId;
+    commit('restore-version');
+  }
+  emit('saved', { action: 'restored', entry });
+  return entry;
+}
+
+/**
+ * The record shape a future account would upload. Every record already carries
+ * the cloud fields (owner / remoteId / syncedAt), so syncing is a matter of
+ * sending these objects, not reshaping them.
+ */
+export function exportForSync() {
+  const now = new Date().toISOString();
+  return {
+    format: 'pcbs.sync.v1',
+    exportedAt: now,
+    cloud: { enabled: false, provider: null, note: 'Local-only records. Add accounts later without changing this shape.' },
+    builds: saved.map((entry) => ({
+      id: entry.id,
+      name: entry.name,
+      items: entry.items,
+      budget: entry.budget,
+      createdAt: entry.createdAt,
+      updatedAt: entry.updatedAt,
+      owner: null,
+      remoteId: null,
+      syncedAt: null,
+      deletedAt: null,
+    })),
+  };
 }
 
 export function makeBuildFromSaved(entry) {

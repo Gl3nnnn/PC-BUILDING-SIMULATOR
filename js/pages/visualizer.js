@@ -3,7 +3,7 @@ import { store, on } from '../core/store.js';
 import { buildPowerDraw, buildTotal, getItems, selectedCount } from '../core/build.js';
 import { evaluateBuild, getCompatibilitySummary } from '../core/compat.js';
 import { getPriceSourceLabel } from '../core/prices.js';
-import { escapeHtml, peso } from '../core/format.js';
+import { escapeHtml, peso, downloadFile, safeFilename } from '../core/format.js';
 import { icon } from '../ui/icons.js';
 import { statusBadge } from '../ui/summary.js';
 import { productArt } from '../ui/art.js';
@@ -130,6 +130,9 @@ export function render(root) {
                 <button class="viz-tool viz-tool--accent" type="button" data-viz="share-card" title="Create a shareable image">
                   ${icon('share', 15)}<span>Share card</span>
                 </button>
+                <button class="viz-tool" type="button" data-viz="glb" title="Download this rig as a .glb 3D file">
+                  ${icon('download', 15)}<span>GLB</span>
+                </button>
               </div>
             </div>
           </div>
@@ -196,8 +199,9 @@ export function render(root) {
           <h3>${escapeHtml(message)}</h3>
           <p>${escapeHtml(detail || 'Your browser could not start WebGL. The 3D scene needs hardware acceleration, but the rest of the builder works normally.')}</p>
           <div class="viz-fallback-actions">
-            <a class="btn btn--primary btn--sm" href="#/builder">${icon('wrench', 14)}<span>Continue building</span></a>
-            <a class="btn btn--ghost btn--sm" href="#/performance">${icon('chart', 14)}<span>Estimate FPS</span></a>
+            <button class="btn btn--primary btn--sm" type="button" data-viz="retry">${icon('refresh', 14)}<span>Try again</span></button>
+            <a class="btn btn--ghost btn--sm" href="#/builder">${icon('wrench', 14)}<span>Continue building</span></a>
+            <a class="btn btn--ghost btn--sm" href="#/data">${icon('palette', 14)}<span>Graphics settings</span></a>
           </div>
         </div>
       </div>
@@ -380,8 +384,13 @@ export function render(root) {
       stage.classList.add('is-ready');
       updateControls();
     } catch (error) {
+      // A failed start is not fatal: say what happened in plain words and offer
+      // a retry, so a driver hiccup never leaves a blank panel.
       console.error(error);
-      if (!disposed) showFallback('3D preview unavailable', error?.message || '');
+      const detail = error?.message && error.message !== 'WebGL is not available in this browser.'
+        ? `${error.message} If this keeps happening, switch to Simplified graphics in Settings.`
+        : 'Your browser could not start WebGL. Try closing other 3D tabs, or switch on Simplified graphics in Settings. The rest of the builder works normally.';
+      if (!disposed) showFallback('3D preview unavailable', detail);
     }
   }
 
@@ -433,6 +442,15 @@ export function render(root) {
     const button = event.target.closest('[data-viz]');
     if (!button) return;
     const action = button.dataset.viz;
+    // A start that failed can be retried without leaving the page: the fallback
+    // panel's button asks for the scene again.
+    if (action === 'retry') {
+      if (sceneApi) return;
+      stage.classList.remove('is-ready');
+      stage.innerHTML = '<div id="viz-loading"><span class="viz-spinner"></span><span>Starting the 3D engine...</span></div>';
+      bootScene();
+      return;
+    }
     if (action === 'rotate') {
       controls.autoRotate = !controls.autoRotate;
       updateControls();
@@ -458,6 +476,15 @@ export function render(root) {
       controls.fullscreen = !controls.fullscreen;
       updateControls();
       sceneApi?.resetView();
+    } else if (action === 'glb') {
+      const bytes = sceneApi?.exportGLB?.();
+      if (!bytes) {
+        toast('3D export unavailable', 'Open this page again and try once more.', 'warning');
+        return;
+      }
+      const name = String(caseItem?.name || 'pc-build');
+      downloadFile(`${safeFilename(name)}-rig.glb`, bytes, 'model/gltf-binary');
+      toast('3D file saved', 'Your rig was written as a .glb you can open in Blender or any 3D viewer.', 'success');
     } else if (action === 'reset') {
       sceneApi?.resetView();
       controls.autoRotate = true;

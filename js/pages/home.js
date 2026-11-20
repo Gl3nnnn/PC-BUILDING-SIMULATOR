@@ -9,6 +9,7 @@ import { productArt } from '../ui/art.js';
 import { presetCard } from '../ui/preset.js';
 import { statusBadge } from '../ui/summary.js';
 import { progressBar } from '../ui/common.js';
+import { modeCardsHTML } from '../ui/modebar.js';
 
 function buildCardHTML() {
   const build = store.getCurrent();
@@ -88,6 +89,38 @@ export function render(root) {
         </div>
       </section>
 
+      <section class="home-hero-3d" id="home-hero-3d">
+        <div class="home-3d-stage" id="home-3d-stage">
+          <div class="home-3d-loading" id="home-3d-loading">
+            <span class="home-3d-spinner" aria-hidden="true"></span>
+            <span>Starting the 3D workshop…</span>
+          </div>
+        </div>
+        <div class="home-3d-copy">
+          <p class="eyebrow"><span class="live-dot"></span> The main attraction</p>
+          <h2 class="home-3d-title">Your rig, live on the bench</h2>
+          <p class="home-3d-sub">This is the real 3D model of your current build — the same case, board, card and cooler you will work on in the workshop. Drag to turn it, take a panel off, or jump straight in and install a part.</p>
+          <div class="home-3d-actions">
+            <a class="btn btn--primary btn--lg" href="#/workshop">${icon('wrench', 17)}<span>Open the workshop</span>${icon('arrowRight', 16)}</a>
+            <a class="btn btn--ghost btn--lg" href="#/visualizer">${icon('cube', 17)}<span>Full 3D view</span></a>
+          </div>
+          <div class="home-3d-chips">
+            <span class="home-3d-chip">${icon('rotate', 13)} Drag to rotate</span>
+            <span class="home-3d-chip">${icon('panel', 13)} Panels come off</span>
+            <span class="home-3d-chip">${icon('cpu', 13)} Click to inspect</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="home-section home-modes">
+        <div class="home-section-head">
+          <p class="eyebrow">Three ways to play</p>
+          <h2>Pick how you want to build</h2>
+          <p class="home-section-sub">Free build is the open workshop. Career gives you customers and budgets. Learn teaches the parts first, with assessments that must be answered correctly.</p>
+        </div>
+        <div class="mode-grid">${modeCardsHTML()}</div>
+      </section>
+
       <section class="home-section">
         <div class="feature-grid">
           <article class="feature-card">
@@ -112,7 +145,7 @@ export function render(root) {
             <span class="feature-icon feature-icon--green">${icon('save', 20)}</span>
             <h3>Save, share, export</h3>
             <p>Keep builds in your browser, rename them, share encoded links, or print a clean PDF summary for shopping.</p>
-            <a href="#/saved" class="text-link">Open saved builds ${icon('arrowRight', 14)}</a>
+            <a href="#/builds" class="text-link">Open my builds ${icon('arrowRight', 14)}</a>
           </article>
         </div>
       </section>
@@ -134,7 +167,7 @@ export function render(root) {
           <div>
             <p class="eyebrow">The whole catalog</p>
             <h2 class="section-title">Browse by component</h2>
-            <p class="section-sub">${HARDWARE.length} sample products across nine categories, searchable and filterable.</p>
+            <p class="section-sub">${HARDWARE.length} sample products across ${CATEGORIES.length} categories, searchable and filterable.</p>
           </div>
         </div>
         <div class="category-grid">${categoryCards}</div>
@@ -175,16 +208,58 @@ export function render(root) {
         </div>
         <div class="cta-band-actions">
           <a class="btn btn--primary btn--lg" href="#/builder">${icon('wrench', 17)}<span>Open the builder</span></a>
-          <a class="btn btn--ghost btn--lg" href="#/saved">${icon('bookmark', 17)}<span>Saved builds</span></a>
+          <a class="btn btn--ghost btn--lg" href="#/builds">${icon('bookmark', 17)}<span>My builds</span></a>
         </div>
       </section>
     </div>
   `;
 
   const cardHost = root.querySelector('#hero-build-card');
+  let sceneApi = null;
+  let disposed = false;
+
+  // An empty build draws only ghost outlines, which looks broken on a front
+  // page. Show a real preset rig instead until the user has parts of their own.
+  function heroPreviewBuild() {
+    const current = store.getCurrent();
+    if (selectedCount(current) > 0) return current;
+    const demo = PRESETS.find((preset) => preset.id === 'high-end-gaming') || PRESETS[0];
+    return demo ? { name: demo.name, items: demo.items } : current;
+  }
+
+  // The workshop bench is the front page's centrepiece: the same live 3D model
+  // the builder drives, mounted here so the first thing you see is the rig.
+  const stage = root.querySelector('#home-3d-stage');
+  if (stage) {
+    import('../three/scene.js')
+      .then(({ createPCScene }) => {
+        if (disposed || !stage.isConnected) return;
+        sceneApi = createPCScene(stage, {
+          build: heroPreviewBuild(),
+          autoRotate: true,
+          rgb: true,
+        });
+        root.querySelector('#home-3d-loading')?.remove();
+        stage.classList.add('is-ready');
+      })
+      .catch((error) => {
+        console.error(error);
+        const loading = root.querySelector('#home-3d-loading');
+        if (loading) {
+          loading.innerHTML = '<span>3D preview unavailable — open the workshop to try again.</span>';
+        }
+      });
+  }
+
   const unsubscribe = on('build', () => {
     if (cardHost?.isConnected) cardHost.innerHTML = buildCardHTML();
+    sceneApi?.updateBuild(heroPreviewBuild());
   });
 
-  return () => unsubscribe();
+  return () => {
+    disposed = true;
+    unsubscribe();
+    sceneApi?.dispose();
+    sceneApi = null;
+  };
 }

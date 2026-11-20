@@ -47,7 +47,7 @@ export function render(root, context = {}) {
         <div>
           <p class="eyebrow">Specs, prices & availability</p>
           <h1 class="page-title">Hardware Database</h1>
-          <p class="page-subtitle">${HARDWARE.length} realistic sample components across nine categories. ${escapeHtml(priceSnapshotSummary())}.</p>
+          <p class="page-subtitle">${HARDWARE.length} realistic sample components across ${CATEGORIES.length} categories. ${escapeHtml(priceSnapshotSummary())}.</p>
         </div>
         <div class="page-actions">
           <a class="btn btn--primary" href="#/builder">${icon('wrench', 16)}<span>Open builder</span></a>

@@ -26,7 +26,7 @@
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 100% 0%, rgba(109, 140, 255, 0.1), transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(47, 129, 247, 0.1), transparent 40%),
     linear-gradient(165deg, #111827, #080c15);
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   overflow: hidden;
@@ -55,7 +55,7 @@
   right: -50px;
   width: 230px;
   height: 230px;
-  background: rgba(109, 140, 255, 0.16);
+  background: rgba(47, 129, 247, 0.16);
 }
 
 .modal-orb--two {
@@ -63,7 +63,7 @@
   left: -60px;
   width: 220px;
   height: 220px;
-  background: rgba(168, 85, 247, 0.09);
+  background: rgba(47, 129, 247, 0.09);
 }
 
 .modal-head {
@@ -449,7 +449,7 @@
   bottom: 0;
   height: 2px;
   width: 100%;
-  background: linear-gradient(90deg, #6d8cff, #a855f7);
+  background: linear-gradient(90deg, #2f81f7, #4aa0ff);
   transform-origin: left;
   animation: toastProgress 4.2s linear forwards;
   opacity: 0.6;
@@ -586,7 +586,7 @@
 }
 
 .command-item.is-selected {
-  background: rgba(109, 140, 255, 0.13);
+  background: rgba(47, 129, 247, 0.13);
 }
 
 .command-item-icon {
@@ -596,9 +596,9 @@
   width: 31px;
   height: 31px;
   flex-shrink: 0;
-  border: 1px solid rgba(109, 140, 255, 0.16);
+  border: 1px solid rgba(47, 129, 247, 0.16);
   border-radius: 7px;
-  background: rgba(109, 140, 255, 0.06);
+  background: rgba(47, 129, 247, 0.06);
   color: #98aaff;
 }
 
@@ -714,9 +714,9 @@
   justify-content: center;
   width: 27px;
   height: 27px;
-  border: 1px solid rgba(109, 140, 255, 0.24);
+  border: 1px solid rgba(47, 129, 247, 0.24);
   border-radius: 50%;
-  background: rgba(109, 140, 255, 0.07);
+  background: rgba(47, 129, 247, 0.07);
   color: #98aaff;
   font-family: var(--font-display);
   font-size: 9px;
@@ -763,8 +763,8 @@
 
 .wizard-use:hover,
 .wizard-use.is-active {
-  border-color: rgba(109, 140, 255, 0.4);
-  background: rgba(109, 140, 255, 0.11);
+  border-color: rgba(47, 129, 247, 0.4);
+  background: rgba(47, 129, 247, 0.11);
 }
 
 .wizard-use.is-active .icon,
@@ -822,8 +822,8 @@
 .wizard-quick-budgets button:hover,
 .wizard-size:hover,
 .wizard-size.is-active {
-  border-color: rgba(109, 140, 255, 0.35);
-  background: rgba(109, 140, 255, 0.1);
+  border-color: rgba(47, 129, 247, 0.35);
+  background: rgba(47, 129, 247, 0.1);
   color: #c9d5ff;
 }
 
@@ -834,7 +834,7 @@
   border-radius: 13px;
   background:
     radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--preset-accent, #6d8cff) 12%, transparent), transparent 44%),
-    rgba(8, 12, 21, 0.54);
+    rgba(28, 30, 34, 0.54);
 }
 
 .wizard-result-head {

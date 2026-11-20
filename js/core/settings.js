@@ -8,6 +8,7 @@ const DEFAULTS = {
   sound: true,
   currency: 'PHP',
   name: '',
+  quality: 'high',
 };
 
 let state = load();
@@ -22,6 +23,7 @@ function load() {
       sound: parsed.sound !== false,
       currency: typeof parsed.currency === 'string' ? parsed.currency : 'PHP',
       name: typeof parsed.name === 'string' ? parsed.name.slice(0, 24) : '',
+      quality: parsed.quality === 'simple' ? 'simple' : 'high',
     };
   } catch {
     return { ...DEFAULTS };
@@ -63,6 +65,7 @@ export function setSetting(patch = {}) {
     state.currency = patch.currency;
     setCurrency(patch.currency, { emit: false });
   }
+  if (patch.quality === 'simple' || patch.quality === 'high') state.quality = patch.quality;
   persist();
   emit();
   return getSettings();
@@ -263,6 +266,7 @@ export function initialiseLanguage() {
   document.documentElement.lang = state.lang === 'fil' ? 'fil' : 'en';
   document.documentElement.dataset.lang = state.lang;
   document.documentElement.dataset.sound = state.sound ? 'on' : 'off';
+  document.documentElement.dataset.quality = state.quality;
   return state.lang;
 }
 

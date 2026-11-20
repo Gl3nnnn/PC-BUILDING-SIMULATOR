@@ -14,7 +14,7 @@ const ROUTES = [
   { label: '3D Visualizer', meta: 'Orbit your current build', href: '#/visualizer', icon: 'cube', keywords: 'three preview render' },
   { label: 'Performance Estimator', meta: 'FPS and bottleneck analysis', href: '#/performance', icon: 'chart', keywords: 'gaming fps bench' },
   { label: 'Compatibility Checker', meta: 'Review every compatibility rule', href: '#/compatibility', icon: 'shield', keywords: 'errors warnings fit' },
-  { label: 'Saved Builds', meta: 'Load, export, or share builds', href: '#/saved', icon: 'bookmark', keywords: 'local storage import export' },
+  { label: 'My Builds', meta: 'Load, export, or share builds', href: '#/builds', icon: 'bookmark', keywords: 'local storage import export' },
   { label: 'Showcase', meta: 'Curated build gallery', href: '#/showcase', icon: 'grid', keywords: 'gallery community favorite' },
   { label: 'About & Guides', meta: 'FAQ and buying guides', href: '#/about', icon: 'info', keywords: 'help documentation' },
 ];

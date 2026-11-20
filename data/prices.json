@@ -3,707 +3,924 @@
   "currency": "PHP",
   "source": "sample",
   "provider": "PC Build Studio sample catalog",
-  "generatedAt": "2026-11-07T12:23:33.796Z",
+  "generatedAt": "2026-11-20T01:48:05.544Z",
   "items": {
     "cpu-i3-12100": {
       "price": 5450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-i3-12100f": {
       "price": 4650,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-i5-12400f": {
       "price": 8250,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-i5-13400f": {
       "price": 11200,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-i5-14600kf": {
       "price": 16900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-i7-14700k": {
       "price": 24900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-i9-14900k": {
       "price": 33500,
       "availability": "low-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-ultra7-265k": {
       "price": 23900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-r5-5600": {
       "price": 6450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-r7-5700x3d": {
       "price": 11800,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-r5-7600": {
       "price": 11500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-r7-7800x3d": {
       "price": 21500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-r9-7950x": {
       "price": 29800,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cpu-r7-9800x3d": {
       "price": 32000,
       "availability": "low-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-gigabyte-a520m-k": {
       "price": 3450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-msi-b550m-pro-vdh": {
       "price": 5450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-asus-x570e": {
       "price": 16500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-asrock-b650m-pro-rs": {
       "price": 10800,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-msi-b650-tomahawk": {
       "price": 14900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-asus-x670e-e": {
       "price": 28500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-asus-b650e-i": {
       "price": 19500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-asus-h610m-e-d4": {
       "price": 4900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-msi-b760m-a-ddr4": {
       "price": 8900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-asus-z790-plus-d4": {
       "price": 16200,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-msi-b760m-a-ddr5": {
       "price": 9600,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-asus-z890-p": {
       "price": 19800,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "mb-msi-b860-tomahawk": {
       "price": 15400,
       "availability": "preorder",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-3050": {
       "price": 10500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-3060": {
       "price": 16500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-4060": {
       "price": 19800,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-4060ti": {
       "price": 26500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-4070-super": {
       "price": 42900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-4070ti-super": {
       "price": 58500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-4080-super": {
       "price": 79900,
       "availability": "low-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-4090": {
       "price": 129000,
       "availability": "low-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-5070": {
       "price": 38900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rtx-5080": {
       "price": 69900,
       "availability": "preorder",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rx-6600": {
       "price": 12900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rx-7600": {
       "price": 18500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rx-7700xt": {
       "price": 29900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rx-7800xt": {
       "price": 36500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rx-7900xtx": {
       "price": 69900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "gpu-rx-9070xt": {
       "price": 52900,
       "availability": "preorder",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-fury-16-3200": {
       "price": 2450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-vulcan-16-3600": {
       "price": 2750,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-lpx-32-3600": {
       "price": 4850,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-tridentz-rgb-32-3600": {
       "price": 5400,
       "availability": "low-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-fury-16-5600": {
       "price": 3650,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-crucial-pro-16-5600": {
       "price": 3100,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-vengeance-32-6000": {
       "price": 6450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-delta-32-6000": {
       "price": 7200,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-tridentz5-32-6400": {
       "price": 8900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ram-fury-renegade-64-6000": {
       "price": 13500,
       "availability": "preorder",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ssd-kingston-a400-480": {
       "price": 1750,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ssd-crucial-bx500-1tb": {
       "price": 3250,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "hdd-seagate-2tb": {
       "price": 3050,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "hdd-wd-blue-4tb": {
       "price": 4950,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ssd-samsung-980-1tb": {
       "price": 4250,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ssd-crucial-p3-plus-1tb": {
       "price": 3950,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ssd-kingston-nv3-1tb": {
       "price": 3400,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ssd-wd-sn850x-2tb": {
       "price": 9850,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ssd-samsung-990pro-2tb": {
       "price": 12500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "ssd-crucial-t705-2tb": {
       "price": 18900,
       "availability": "low-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "psu-corsair-cv450": {
       "price": 2050,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "psu-cm-mwe550": {
       "price": 2650,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "psu-seasonic-gx650": {
       "price": 4950,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "psu-msi-a750gl": {
       "price": 5850,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "psu-corsair-rm850e": {
       "price": 7450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "psu-seasonic-vertex-1000": {
       "price": 11900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "psu-fsp-dagger-650": {
       "price": 4650,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "psu-bequiet-1200": {
       "price": 13500,
       "availability": "preorder",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-deepcool-matrexx40": {
       "price": 2350,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-tecware-forge-m2": {
       "price": 2150,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-jonsbo-d31": {
       "price": 3750,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-lianli-lancool216": {
       "price": 5950,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-nzxt-h5-flow": {
       "price": 5450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-corsair-4000d": {
       "price": 5850,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-fractal-north": {
       "price": 8900,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-cm-nr200p": {
       "price": 4850,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-lianli-o11-evo": {
       "price": 9500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "case-asus-hyperion": {
       "price": 22900,
       "availability": "low-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-amd-stock": {
       "price": 950,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-intel-stock": {
       "price": 850,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-idcooling-se214": {
       "price": 1150,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-deepcool-ak400": {
       "price": 1650,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-thermalright-pa120": {
       "price": 2150,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-noctua-nhd15": {
       "price": 5950,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-bequiet-darkrock5": {
       "price": 6850,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-nzxt-kraken240": {
       "price": 7450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-deepcool-lt720": {
       "price": 6950,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-lianli-galahad280": {
       "price": 8200,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-corsair-h150i": {
       "price": 11500,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "cooler-arctic-lf3-420": {
       "price": 9900,
       "availability": "preorder",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "fans-arctic-p12-3": {
       "price": 1450,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "fans-thermalright-c12c-3": {
       "price": 1050,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "fans-cm-sickleflow-3": {
       "price": 1650,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "fans-corsair-ql140-2": {
       "price": 3950,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "fans-arctic-p14-5": {
       "price": 2650,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "fans-lianli-sl120-3": {
       "price": 4850,
       "availability": "low-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     },
     "fans-noctua-a12x25-2": {
       "price": 4650,
       "availability": "in-stock",
       "vendor": null,
       "url": null,
-      "updatedAt": "2026-11-07T12:23:33.796Z"
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-asus-strix-4070s": {
+      "price": 49900,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-msi-gamingx-4060ti": {
+      "price": 29800,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-gigabyte-4060-gaming": {
+      "price": 21200,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-asus-dual-4060": {
+      "price": 20400,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-msi-ventus-3050": {
+      "price": 11200,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-sapphire-nitro-7800xt": {
+      "price": 39900,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-asus-tuf-7800xt": {
+      "price": 38200,
+      "availability": "low-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-gigabyte-7600-gaming": {
+      "price": 19800,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-powercolor-hellhound-6600": {
+      "price": 13400,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "gpu-nvidia-5070ti": {
+      "price": 84900,
+      "availability": "preorder",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "psu-asus-rog-strix-1000": {
+      "price": 13900,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "psu-gigabyte-aorus-850": {
+      "price": 8900,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "psu-nzxt-c850": {
+      "price": 9250,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cooler-msi-coreliquid-360": {
+      "price": 7900,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cooler-gigabyte-aorus-360": {
+      "price": 9500,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "fans-nzxt-f120-3": {
+      "price": 4350,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "fans-cm-mf120-3": {
+      "price": 3450,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "fans-msi-p12-3": {
+      "price": 3250,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "fans-gigabyte-aorus-140-2": {
+      "price": 2950,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "fans-deepcool-fc120-3": {
+      "price": 2650,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "fans-asus-tuf-t120-3": {
+      "price": 3050,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "fans-samsung-none": {
+      "price": 2850,
+      "availability": "preorder",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cable-corsair-type4-24pin": {
+      "price": 1450,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cable-corsair-type4-pcie": {
+      "price": 950,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cable-corsair-12vhpwr": {
+      "price": 1650,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cable-seasonic-12vhpwr": {
+      "price": 1500,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cable-lianli-strimer-gpu": {
+      "price": 3450,
+      "availability": "low-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cable-startech-sata-3": {
+      "price": 650,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cable-cm-fan-splitter": {
+      "price": 320,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cable-deepcool-argb-hub": {
+      "price": 890,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
+    },
+    "cable-nzxt-usb-header": {
+      "price": 450,
+      "availability": "in-stock",
+      "vendor": null,
+      "url": null,
+      "updatedAt": "2026-11-20T01:48:05.544Z"
     }
   }
 }

@@ -43,8 +43,8 @@
 }
 
 .db-cat-chip.is-active {
-  background: rgba(109, 140, 255, 0.14);
-  border-color: rgba(109, 140, 255, 0.36);
+  background: rgba(47, 129, 247, 0.14);
+  border-color: rgba(47, 129, 247, 0.36);
   color: #d6e0ff;
 }
 
@@ -64,7 +64,7 @@
 }
 
 .db-cat-chip.is-active em {
-  background: rgba(109, 140, 255, 0.22);
+  background: rgba(47, 129, 247, 0.22);
   color: #c3d0ff;
 }
 
@@ -164,7 +164,7 @@
   padding: 17px;
   border: 1px solid var(--line);
   border-radius: 15px;
-  background: linear-gradient(165deg, rgba(16, 23, 40, 0.62), rgba(8, 12, 21, 0.52));
+  background: linear-gradient(165deg, rgba(38, 40, 45, 0.62), rgba(28, 30, 34, 0.52));
   transition: transform 0.22s var(--ease), border-color 0.22s;
 }
 
@@ -174,8 +174,8 @@
 }
 
 .saved-card.is-current {
-  border-color: rgba(109, 140, 255, 0.36);
-  background: linear-gradient(165deg, rgba(109, 140, 255, 0.08), rgba(8, 12, 21, 0.6));
+  border-color: rgba(47, 129, 247, 0.36);
+  background: linear-gradient(165deg, rgba(47, 129, 247, 0.08), rgba(28, 30, 34, 0.6));
 }
 
 .saved-card.is-current::before {
@@ -185,7 +185,7 @@
   left: 18px;
   right: 18px;
   height: 2px;
-  background: linear-gradient(90deg, #6d8cff, #a855f7);
+  background: linear-gradient(90deg, #2f81f7, #4aa0ff);
   border-radius: 0 0 2px 2px;
 }
 
@@ -333,7 +333,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: linear-gradient(160deg, rgba(16, 23, 40, 0.72), rgba(8, 12, 21, 0.62));
+  background: linear-gradient(160deg, rgba(38, 40, 45, 0.72), rgba(28, 30, 34, 0.62));
 }
 
 .compat-overview--ok {
@@ -363,7 +363,7 @@
   width: 280px;
   height: 280px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(109, 140, 255, 0.16), transparent 68%);
+  background: radial-gradient(circle, rgba(47, 129, 247, 0.16), transparent 68%);
   pointer-events: none;
 }
 
@@ -539,8 +539,8 @@
 }
 
 .missing-chip:hover {
-  background: rgba(109, 140, 255, 0.1);
-  border-color: rgba(109, 140, 255, 0.3);
+  background: rgba(47, 129, 247, 0.1);
+  border-color: rgba(47, 129, 247, 0.3);
   color: #d6e0ff;
 }
 
@@ -688,7 +688,7 @@
 
 .part-chip:hover {
   color: #c3d0ff;
-  border-color: rgba(109, 140, 255, 0.3);
+  border-color: rgba(47, 129, 247, 0.3);
 }
 
 .part-chip span {
@@ -829,3 +829,227 @@
 .compat-empty .empty-state {
   margin-bottom: 16px;
 }
+
+/* Rule-by-rule verdicts */
+.rule-verdict-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.rule-verdict {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.03);
+  overflow: hidden;
+}
+
+.rule-verdict--ok { border-left-color: var(--ok); }
+.rule-verdict--warn { border-left-color: var(--warn); }
+.rule-verdict--error { border-left-color: var(--error); }
+.rule-verdict--info { border-left-color: var(--info); }
+
+.rule-verdict > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.rule-verdict > summary::-webkit-details-marker { display: none; }
+
+.rule-verdict-icon {
+  display: inline-flex;
+  color: #94a3b8;
+}
+
+.rule-verdict--ok .rule-verdict-icon { color: var(--ok); }
+.rule-verdict--warn .rule-verdict-icon { color: var(--warn); }
+.rule-verdict--error .rule-verdict-icon { color: var(--error); }
+.rule-verdict--info .rule-verdict-icon { color: var(--info); }
+
+.rule-verdict-label {
+  flex: 1;
+  color: #dbe4f0;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.rule-verdict-state {
+  color: #8592ab;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rule-verdict--ok .rule-verdict-state { color: var(--ok); }
+.rule-verdict--warn .rule-verdict-state { color: var(--warn); }
+.rule-verdict--error .rule-verdict-state { color: var(--error); }
+
+.rule-verdict-findings {
+  margin: 0;
+  padding: 0 12px 10px;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.finding {
+  padding-left: 9px;
+  border-left: 2px solid var(--line);
+}
+
+.finding--ok { border-left-color: var(--ok); }
+.finding--warn { border-left-color: var(--warn); }
+.finding--error { border-left-color: var(--error); }
+.finding--info { border-left-color: var(--info); }
+
+.finding strong {
+  display: block;
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.finding p {
+  margin: 2px 0 0;
+  color: #8b98af;
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
+.rule-verdict-empty {
+  margin: 0;
+  padding: 0 12px 10px;
+  color: #7b88a2;
+  font-size: 9.5px;
+}
+
+/* ---- Power & thermal simulation ---- */
+.thermal-panel {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(16, 22, 34, 0.9), rgba(10, 14, 23, 0.9));
+}
+
+.thermal-panel .games-head { margin-bottom: 12px; }
+
+.thermal-empty {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8b98af;
+  font-size: 12px;
+}
+
+.thermal-verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.thermal-verdict strong { font-size: 12.5px; }
+.thermal-verdict p { margin: 0; font-size: 11px; color: #93a1b9; line-height: 1.5; }
+.thermal-verdict--ok { border-color: rgba(34, 197, 94, 0.28); background: rgba(34, 197, 94, 0.07); }
+.thermal-verdict--ok strong { color: #6ee7a8; }
+.thermal-verdict--warn { border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.07); }
+.thermal-verdict--warn strong { color: #fcd34d; }
+.thermal-verdict--error { border-color: rgba(244, 63, 94, 0.32); background: rgba(244, 63, 94, 0.08); }
+.thermal-verdict--error strong { color: #fda4b3; }
+
+.thermal-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.thermal-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.thermal-stat span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8b98af;
+}
+
+.thermal-stat strong { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+.thermal-stat em { font-style: normal; font-size: 10px; color: #7b88a2; line-height: 1.45; }
+.thermal-stat--ok strong { color: #6ee7a8; }
+.thermal-stat--warn strong { color: #fcd34d; }
+.thermal-stat--error strong { color: #fda4b3; }
+
+.thermal-bars {
+  display: grid;
+  gap: 11px;
+  margin-bottom: 12px;
+}
+
+.thermal-bar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8b98af;
+  margin-bottom: 5px;
+}
+
+.thermal-bar-head span { display: inline-flex; align-items: center; gap: 6px; }
+.thermal-bar-head strong { color: #dbe4f4; text-transform: none; letter-spacing: 0; font-size: 11.5px; }
+
+.thermal-track {
+  height: 7px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.thermal-track span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #38bdf8, #6d8cff);
+}
+
+.thermal-bar p { margin: 5px 0 0; font-size: 10px; color: #7b88a2; line-height: 1.45; }
+
+.thermal-throttle {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(34, 197, 94, 0.24);
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.thermal-throttle strong { font-size: 12px; color: #6ee7a8; }
+.thermal-throttle p { margin: 3px 0 0; font-size: 11px; color: #93a1b9; line-height: 1.5; }
+.thermal-throttle--warn { border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.07); }
+.thermal-throttle--warn strong { color: #fcd34d; }
+
+.thermal-formulas { margin-top: 12px; }
+.thermal-formulas p { font-size: 10.5px; }
+.thermal-formula-foot { color: #7b88a2; font-style: italic; }

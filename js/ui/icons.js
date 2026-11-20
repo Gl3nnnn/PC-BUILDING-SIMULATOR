@@ -8,6 +8,7 @@ const PATHS = {
   psu: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M14 10h4M14 14h3"/>',
   case: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 2v20"/><circle cx="14" cy="8" r="1"/><circle cx="14" cy="12" r="1"/><path d="M13 16h4"/>',
   cooler: '<rect x="7" y="3" width="10" height="12" rx="1"/><path d="M9.5 5v8M12 5v8M14.5 5v8"/><circle cx="12" cy="19" r="3"/>',
+  cable: '<path d="M4 8a3 3 0 0 1 3-3h4a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h4a3 3 0 0 1 3-3"/><rect x="15" y="4" width="5" height="4" rx="1"/><rect x="4" y="16" width="5" height="4" rx="1"/>',
   fan: '<circle cx="12" cy="12" r="9"/><path d="M12 12c0-3.5 2-6 5-5.5S19 12 15.5 12M12 12c-3.5 0-6 2-5.5 5S12 19 12 15.5M12 12c0 3.5-2 6-5 5.5S5 12 8.5 12M12 12c3.5 0 6-2 5.5-5S12 5 12 8.5"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   close: '<path d="M18 6 6 18M6 6l12 12"/>',

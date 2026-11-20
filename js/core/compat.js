@@ -27,6 +27,54 @@ function vrmPhaseCount(specs) {
   return match ? Number(match[1]) : null;
 }
 
+// The nine areas the engine validates, each with its own verdict.
+export const RULE_AREAS = [
+  { id: 'cpu-socket', label: 'CPU socket and motherboard', matcher: /^CPU socket|^Chipset|^Motherboard power delivery/ },
+  { id: 'bios', label: 'CPU generation and BIOS support', matcher: /^CPU generation|^BIOS/ },
+  { id: 'ram', label: 'Memory generation and motherboard support', matcher: /^Memory|^Not enough memory|^Single-channel/ },
+  { id: 'board-case', label: 'Motherboard form factor and case', matcher: /^Motherboard (fits|does not fit)/ },
+  { id: 'gpu-clearance', label: 'Graphics card size and case clearance', matcher: /^Graphics card|^Tight graphics card/ },
+  { id: 'cooler', label: 'CPU cooler socket and clearance', matcher: /^Cooler|^CPU cooler|^Liquid cooler|^Bundled cooler|^Using the bundled/ },
+  { id: 'psu-size', label: 'Power supply dimensions and case support', matcher: /^Power supply (form factor|is too long|length)/ },
+  { id: 'psu-power', label: 'Power supply wattage and connectors', matcher: /^Power supply wattage|^Power supply headroom|^Not enough PCIe|^GPU power|^Native 16-pin|^PSU has|^Only one CPU power cable/ },
+  { id: 'storage', label: 'Storage interface and motherboard support', matcher: /^M\.2|^SATA|^NVMe|^Not enough M\.2|^Storage interface/ },
+];
+
+export const RULE_VERDICTS = {
+  compatible: { label: 'Compatible', tone: 'ok', icon: 'check' },
+  warning: { label: 'Warning', tone: 'warn', icon: 'alert' },
+  incompatible: { label: 'Incompatible', tone: 'error', icon: 'x' },
+  unchecked: { label: 'Not checked', tone: 'info', icon: 'dot' },
+};
+
+function summarizeRules(checks) {
+  const buckets = new Map(RULE_AREAS.map((area) => [area.id, []]));
+  checks.forEach((check) => {
+    const area = RULE_AREAS.find((entry) => entry.matcher.test(check.title));
+    if (area) buckets.get(area.id).push(check);
+  });
+
+  return RULE_AREAS.map((area) => {
+    const found = buckets.get(area.id);
+    const verdict = found.some((check) => check.level === 'error')
+      ? 'incompatible'
+      : found.some((check) => check.level === 'warn')
+        ? 'warning'
+        : found.some((check) => check.level === 'ok')
+          ? 'compatible'
+          : 'unchecked';
+    return {
+      id: area.id,
+      label: area.label,
+      verdict,
+      state: RULE_VERDICTS[verdict].label,
+      tone: RULE_VERDICTS[verdict].tone,
+      icon: RULE_VERDICTS[verdict].icon,
+      findings: found.map((check) => ({ level: check.level, title: check.title, detail: check.detail })),
+    };
+  });
+}
+
 export const COMPATIBILITY_LABELS = {
   compatible: { label: 'Compatible', tone: 'ok', icon: 'check' },
   warning: { label: 'Warnings', tone: 'warn', icon: 'alert' },
@@ -34,6 +82,54 @@ export const COMPATIBILITY_LABELS = {
   incomplete: { label: 'Incomplete', tone: 'info', icon: 'dot' },
   empty: { label: 'Empty build', tone: 'neutral', icon: 'dot' },
 };
+
+// Chipsets with the year they launched, used to explain BIOS support for newer CPUs.
+const CHIPSET_PLATFORM = {
+  A520: { socket: 'AM4', year: 2020 }, B550: { socket: 'AM4', year: 2020 }, X570: { socket: 'AM4', year: 2019 },
+  A620: { socket: 'AM5', year: 2023 }, B650: { socket: 'AM5', year: 2022 }, B650E: { socket: 'AM5', year: 2022 },
+  X670: { socket: 'AM5', year: 2022 }, X670E: { socket: 'AM5', year: 2022 },
+  H610: { socket: 'LGA1700', year: 2022 }, B660: { socket: 'LGA1700', year: 2022 },
+  B760: { socket: 'LGA1700', year: 2023 }, Z690: { socket: 'LGA1700', year: 2021 }, Z790: { socket: 'LGA1700', year: 2022 },
+  B860: { socket: 'LGA1851', year: 2024 }, Z890: { socket: 'LGA1851', year: 2024 },
+};
+
+const CPU_FAMILIES = [
+  { test: /^cpu-i[3579]-14\d{3}/, family: 'Intel 14th gen (Raptor Lake Refresh)', year: 2023 },
+  { test: /^cpu-i[3579]-13\d{3}/, family: 'Intel 13th gen (Raptor Lake)', year: 2022 },
+  { test: /^cpu-i[3579]-12\d{3}/, family: 'Intel 12th gen (Alder Lake)', year: 2021 },
+  { test: /^cpu-ultra/, family: 'Intel Core Ultra 200S', year: 2024 },
+  { test: /^cpu-r[579]-9\d{3}/, family: 'AMD Ryzen 9000 (Zen 5)', year: 2024 },
+  { test: /^cpu-r[579]-7\d{3}/, family: 'AMD Ryzen 7000 (Zen 4)', year: 2022 },
+  { test: /^cpu-r[579]-5\d{3}/, family: 'AMD Ryzen 5000 (Zen 3)', year: 2020 },
+];
+
+function cpuFamily(cpu) {
+  if (!cpu) return null;
+  return CPU_FAMILIES.find((entry) => entry.test.test(cpu.id)) || null;
+}
+
+// How many expansion slots a card occupies, from its thickness across the board.
+function gpuSlotCount(gpu) {
+  const width = Number(gpu?.specs?.dimensions?.[2]);
+  if (!Number.isFinite(width)) return null;
+  return Math.ceil(width / 20);
+}
+
+// Slots a case can give a card, from its own published card length.
+function caseSlotCount(pcCase) {
+  const length = Number(pcCase?.specs?.maxGpuLength);
+  if (!Number.isFinite(length)) return null;
+  if (length < 300) return 2;
+  if (length < 360) return 3;
+  return 4;
+}
+
+// CPU power cables a unit carries: one 8-pin below 850 W, two from 850 W up.
+function psuCpuCables(psu) {
+  const wattage = Number(psu?.specs?.wattage);
+  if (!Number.isFinite(wattage)) return null;
+  return wattage >= 850 ? 2 : 1;
+}
 
 export function evaluateBuild(build) {
   const items = {};
@@ -437,6 +533,50 @@ export function evaluateBuild(build) {
     }
   }
 
+  if (cpu && motherboard) {
+    const family = cpuFamily(cpu);
+    const platform = CHIPSET_PLATFORM[motherboard.specs.chipset];
+    if (family && platform) {
+      if (platform.year < family.year) {
+        add('warn', 'BIOS update likely needed for this CPU', `${cpu.name} is a ${family.family} part (${family.year}), while ${motherboard.name}'s ${motherboard.specs.chipset} chipset launched in ${platform.year}. The socket is the same, so it will fit — but the board may ship with an older BIOS that cannot boot this CPU. Update the BIOS with the board's flash-back feature before installing, or choose a newer chipset.`, ids(cpu, motherboard));
+      } else {
+        add('ok', 'CPU generation is supported out of the box', `${motherboard.name}'s ${motherboard.specs.chipset} chipset (${platform.year}) shipped after ${family.family} (${family.year}), so the board boots this CPU without a BIOS update.`, ids(cpu, motherboard));
+      }
+    } else if (family || motherboard.specs.chipset) {
+      unknown('CPU generation and BIOS support', 'The CPU family or the chipset launch generation is not listed, so BIOS support cannot be confirmed.', ids(cpu, motherboard));
+    }
+  }
+
+  if (gpu && pcCase) {
+    const slots = gpuSlotCount(gpu);
+    const room = caseSlotCount(pcCase);
+    if (Number.isFinite(slots) && Number.isFinite(room)) {
+      if (slots > room) {
+        add('warn', 'Graphics card takes more slots than the case allows', `${gpu.name} is about ${slots} slots thick, but ${pcCase.name} leaves room for ${room}. It may fit lengthways yet block the slots below — verify the card's slot count in the case's spec sheet.`, ids(gpu, pcCase));
+      } else if (slots >= room) {
+        add('warn', 'Graphics card fills every expansion slot', `${gpu.name} needs ${slots} slots and ${pcCase.name} offers ${room}. It fits, but nothing can go below the card, so an extra PCIe card or a thicker cooler would not fit.`, ids(gpu, pcCase));
+      } else {
+        add('ok', 'Graphics card slot fit is comfortable', `${gpu.name} needs ${slots} slots and ${pcCase.name} offers ${room}, leaving room below the card.`, ids(gpu, pcCase));
+      }
+    }
+  }
+
+  if (psu && cpu) {
+    const cables = psuCpuCables(psu);
+    const peak = Number(cpu.specs.peakPower);
+    if (Number.isFinite(cables) && Number.isFinite(peak)) {
+      if (peak >= 200 && cables < 2) {
+        add('warn', 'Only one CPU power cable on this power supply', `${psu.name} carries ${cables}× CPU 8-pin cable, but ${cpu.name} can draw up to ${peak} W. It will run on one cable, but sustained boost and overclocking are limited — a unit with two CPU cables is safer for this CPU.`, ids(cpu, psu));
+      } else if (peak >= 150 && cables >= 2) {
+        add('ok', 'Power supply has the CPU cables this chip wants', `${psu.name} provides ${cables}× CPU 8-pin cables for ${cpu.name}'s ${peak} W maximum boost power.`, ids(cpu, psu));
+      }
+    }
+  }
+
+  if (psu && motherboard && !psu.specs.twelveVHPWR && Number(psu.specs.wattage) >= 850) {
+    add('info', 'Modular cables are part of the PSU choice', `${psu.name} does not list a native 16-pin GPU cable, so check the adapter plan against the board's PCIe layout before buying.`, ids(psu));
+  }
+
   const lowStock = [...new Set([...items.cpu, ...items.motherboard, ...items.gpu, ...items.ram, ...items.storage, ...items.psu, ...items.case, ...items.cooler, ...items.fans])].filter((item) => item.availability === 'low-stock');
   const preorder = [...new Set([...items.cpu, ...items.motherboard, ...items.gpu, ...items.ram, ...items.storage, ...items.psu, ...items.case, ...items.cooler, ...items.fans])].filter((item) => item.availability === 'preorder');
   if (lowStock.length) {
@@ -462,6 +602,7 @@ export function evaluateBuild(build) {
   return {
     status,
     checks,
+    rules: summarizeRules(checks),
     errors,
     warnings,
     passes,

@@ -272,7 +272,8 @@ export function baysFor(build) {
 export function trayFor(build) {
   return CATEGORIES
     .flatMap((category) => getItems(build, category.id).map((item) => ({ category: category.id, item })))
-    .filter((entry) => entry.category !== 'cable');
+    // Accessories such as cables have no bay to go into, so they stay off the tray.
+    .filter((entry) => bayForCategory(entry.category));
 }
 
 export function bayForCategory(categoryId) {
