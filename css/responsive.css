@@ -1,10 +1,35 @@
+@media (max-width: 1560px) {
+  /* The header runs out of room between the nine nav links and the mode switch.
+     Narrow the switch to its icons and tighten the gaps so nothing overlaps. */
+  .header-inner {
+    gap: 16px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .mode-chip {
+    padding: 7px 9px;
+    gap: 0;
+  }
+
+  .mode-chip span {
+    display: none;
+  }
+
+  .nav-link {
+    padding: 8px 9px;
+  }
+}
+
 @media (max-width: 1400px) {
   .builder-layout {
     grid-template-columns: 214px minmax(0, 1fr) 326px;
   }
 
   .nav-link {
-    padding: 8px 9px;
+    padding: 8px 8px;
     font-size: 12px;
   }
 
@@ -206,7 +231,7 @@
     bottom: auto;
     transform: none;
     width: min(430px, 100%);
-    margin: -18px auto 0;
+    margin: 12px auto 0;
   }
 
   .hero-case-art {
@@ -901,7 +926,7 @@
   }
 
   .hero-build-wrap {
-    margin-top: -36px;
+    margin-top: 8px;
   }
 
   .float-chip {

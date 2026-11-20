@@ -112,22 +112,25 @@ export function buildMemoryModel(kit, build) {
       } else {
         addRoundedBox(partsGroup, 0.032, 0.012, 0.032, 0.004, BOARD_X + 0.034, crownY + 0.004, z, topMaterial, 'y').castShadow = false;
       }
-
       // Printed label on each stick, in the maker's own wordmark style.
+      const ramTex = tex(`plate-ram:${design.key}:${trims0(kits, index)}:${accent.getHex()}`, () => brandPlate({
+        brand: kits[0]?.brand,
+        title: (design.mark || 'RAM').toUpperCase(),
+        sub: `DDR${kits[0]?.specs?.type || '4'} ${kits[0]?.specs?.speed || ''}`.trim(),
+        accent,
+        design,
+        direction: 'tall',
+      }));
       const label = new THREE.Mesh(
         new THREE.PlaneGeometry(0.026, 0.11),
         new THREE.MeshStandardMaterial({
           // Tinted down: the plate texture carries a bright sheen, which at
           // full strength washed each stick out to a pale pink sheet.
           color: 0x7d8798,
-          map: tex(`plate-ram:${design.key}:${trims0(kits, index)}:${accent.getHex()}`, () => brandPlate({
-            brand: kits[0]?.brand,
-            title: (design.mark || 'RAM').toUpperCase(),
-            sub: `DDR${kits[0]?.specs?.type || '4'} ${kits[0]?.specs?.speed || ''}`.trim(),
-            accent,
-            design,
-            direction: 'tall',
-          })),
+          map: ramTex,
+          emissive: 0xffffff,
+          emissiveMap: ramTex,
+          emissiveIntensity: 0.45,
           roughness: 0.45,
           metalness: 0.2,
         }),

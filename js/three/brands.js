@@ -314,18 +314,22 @@ export function brandPlate(options = {}) {
   const accentCss = `#${accentColor.getHexString()}`;
   const bodyCss = `#${new THREE.Color(design.body).getHexString()}`;
 
-  const width = direction === 'tall' ? 256 : PLATE_W;
-  const height = direction === 'tall' ? 512 : PLATE_H;
+  const width = direction === 'tall' ? 256 : direction === 'banner' ? 1152 : PLATE_W;
+  const height = direction === 'tall' ? 512 : direction === 'banner' ? 144 : PLATE_H;
+  // Drawn at this size but rasterised bigger when a plate is seen up close, so
+  // the letters stay crisp. The glyph sizes below are in this logical space.
+  const scale = Math.max(1, Math.min(3, options.resolution || 1));
   const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = Math.round(width * scale);
+  canvas.height = Math.round(height * scale);
   const ctx = canvas.getContext('2d');
 
   if (!ctx) return new THREE.CanvasTexture(canvas);
+  ctx.scale(scale, scale);
 
   const base = ctx.createLinearGradient(0, 0, width, height);
   base.addColorStop(0, bodyCss);
-  base.addColorStop(0.55, '#080a0f');
+  base.addColorStop(0.55, '#11151d');
   base.addColorStop(1, bodyCss);
   ctx.fillStyle = base;
   ctx.fillRect(0, 0, width, height);
@@ -368,12 +372,24 @@ export function brandPlate(options = {}) {
       });
     }
     ctx.restore();
-  } else {
-    drawWordmark(ctx, (title || design.mark || '').toUpperCase(), width * 0.07, height * 0.44, 46, '#eff4ff', {
+  } else if (direction === 'banner') {
+    // Long thin banner for the side face of a graphics card: the maker wordmark
+    // on the left, the model line right-aligned at the far end, so the two never
+    // run into each other the way they did on a square plate stretched flat.
+    drawWordmark(ctx, (title || design.mark || '').toUpperCase(), width * 0.045, height * 0.68, 78, '#ffffff', {
       weight: design.weight, tracking: design.tracking, align: 'left',
     });
     if (sub) {
-      drawWordmark(ctx, sub, width * 0.07, height * 0.78, 20, accentCss, {
+      drawWordmark(ctx, sub, width * 0.96, height * 0.68, 40, accentCss, {
+        weight: 700, tracking: 0.12, align: 'right',
+      });
+    }
+  } else {
+    drawWordmark(ctx, (title || design.mark || '').toUpperCase(), width * 0.07, height * 0.46, 58, '#ffffff', {
+      weight: design.weight, tracking: design.tracking, align: 'left',
+    });
+    if (sub) {
+      drawWordmark(ctx, sub, width * 0.07, height * 0.82, 24, accentCss, {
         weight: 700, tracking: 0.1, align: 'left',
       });
     }
@@ -387,7 +403,7 @@ export function brandPlate(options = {}) {
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
+  texture.anisotropy = 8;
   return texture;
 }
 

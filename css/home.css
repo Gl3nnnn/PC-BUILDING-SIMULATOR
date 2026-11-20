@@ -89,7 +89,7 @@
 .hero-visual {
   position: relative;
   z-index: 1;
-  min-height: 500px;
+  min-height: 560px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -904,4 +904,31 @@
   .home-3d-stage {
     min-height: 300px;
   }
+}
+
+/* --- hero layout: stack the case art above its card, no overlapping ----- */
+.hero-visual {
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.hero-case-art {
+  width: min(74%, 400px);
+}
+
+.float-chip--three {
+  top: 30%;
+}
+
+.hero-build-wrap {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  transform: none;
+  width: min(430px, 100%);
+  margin-top: 10px;
 }

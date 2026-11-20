@@ -99,7 +99,9 @@ export function buildGpuModel(kit, build) {
         addRoundedBox(partsGroup, depth * 0.9, 0.006, 0.02, 0.002, centerX, GPU_Y + side * (height / 2 - 0.012), centerZ + length / 2 - 0.02, trimMaterial, 'z').castShadow = false;
       }
     } else {
-      addBox(partsGroup, 0.008, 0.006, length * 0.72, centerX + depth / 2 - 0.007, GPU_Y + height / 2 - 0.018, centerZ, trimMaterial).castShadow = false;
+      // On the far face, not the glass side: this strip used to run straight
+      // across the printed wordmark.
+      addBox(partsGroup, 0.008, 0.006, length * 0.72, centerX - depth / 2 + 0.004, GPU_Y + height / 2 - 0.018, centerZ, trimMaterial).castShadow = false;
     }
 
     // Display bracket with three output ports and a thumbscrew.
@@ -113,10 +115,13 @@ export function buildGpuModel(kit, build) {
     const pitch = length / fanCount;
     // Slimmer card, three bigger fans: at 22 cm tall with 7 cm rotors the
     // shroud read as a tall black box with three small circles on it.
-    const fanRadius = Math.min(0.075, pitch / 2 - 0.008);
+    // Slightly smaller rotors, dropped a touch lower, so a clear band stays
+    // free above them for the printed wordmark. Dropped again here so the sign
+    // could move down without its lower edge touching the rotor tips.
+    const fanRadius = Math.min(0.056, pitch / 2 - 0.008);
     for (let index = 0; index < fanCount; index += 1) {
       const fanZ = centerZ - length / 2 + pitch * (index + 0.5);
-      addFan(partsGroup, { x: centerX + depth / 2 + 0.007, y: GPU_Y, z: fanZ }, fanRadius, {
+      addFan(partsGroup, { x: centerX + depth / 2 + 0.007, y: GPU_Y - 0.032, z: fanZ }, fanRadius, {
         rgb: true,
         accent,
         rotationY: Math.PI / 2,
@@ -138,24 +143,60 @@ export function buildGpuModel(kit, build) {
     addBox(partsGroup, 0.045, 0.022, 0.032, centerX + 0.015, GPU_Y + height / 2 + 0.008, centerZ + length / 2 - 0.07, faceMaterial).castShadow = false;
     addBox(partsGroup, 0.032, 0.008, 0.024, centerX + 0.015, GPU_Y + height / 2 + 0.019, centerZ + length / 2 - 0.07, chromeMaterial).castShadow = false;
 
-    // Printed brand plate along the card face.
-    const plate = new THREE.Mesh(
-      new THREE.PlaneGeometry(Math.min(0.17, length * 0.42), 0.028),
-      new THREE.MeshStandardMaterial({
-        map: tex(`plate-gpu:${design.key}:${gpu.id ?? gpu.name}:${accent.getHex()}`, () => brandPlate({
-          brand: gpu.brand,
-          title: design.mark,
-          sub: (gpu.name || '').replace(/NVIDIA |AMD /g, '').slice(0, 22).toUpperCase(),
-          accent,
-          design,
-        })),
-        roughness: 0.4,
-        metalness: 0.35,
-      }),
-    );
-    plate.rotation.y = Math.PI / 2;
-    plate.position.set(centerX + depth / 2 + 0.0045, GPU_Y + height / 2 - 0.036, centerZ + length / 2 - 0.055);
-    partsGroup.add(plate);
+    // Printed plate along the card face. Wide enough to actually read: at
+    // 0.17 by 0.028 the maker wordmark was a grey smudge behind the glass.
+    const plateTex = tex(`plate-gpu:${design.key}:${gpu.id ?? gpu.name}:${accent.getHex()}`, () => brandPlate({
+      brand: gpu.brand,
+      title: design.mark,
+      sub: (gpu.name || '').replace(/NVIDIA |AMD /g, '').slice(0, 22).toUpperCase(),
+      accent,
+      design,
+      // A long thin banner, shaped like the strip of card face above the fans:
+      // the square plate texture stretched into this band turned the letters
+      // into stripes.
+      direction: 'banner',
+      pattern: 'none',
+      resolution: 3,
+    }));
+    // One plate, printed on both sides and duplicated either side of the card,
+    // so the maker's name shows whichever glass panel you look through.
+    const plateW = Math.min(0.52, length * 0.88);
+    // 8:1, matching the banner texture: at 12:1 the letters were squeezed
+    // sideways because the canvas was wider than the plate.
+    const plateH = Math.min(0.046, plateW / 11.3);
+    const plateMat = new THREE.MeshStandardMaterial({
+      map: plateTex,
+      // Glow matched to the power-supply badge, which is the one plate that
+      // already read on screen. At 1.5 the whole plate blew out to a white
+      // block; the background was glowing as hard as the letters.
+      emissive: 0xffffff,
+      emissiveMap: plateTex,
+      emissiveIntensity: 0.3,
+      roughness: 0.35,
+      metalness: 0.1,
+      side: THREE.DoubleSide,
+    });
+    plateMat.userData.shared = false;
+    const plateGeo = new THREE.PlaneGeometry(plateW, plateH);
+    // Centred on the card. It used to be pushed to the front end, where the
+    // intake fans and the front panel crowded it out of sight.
+    const plateZ = centerZ;
+    // In the band above the fans, clear of both the rotors below and the
+    // glowing top strip above: on the card's side face, where it is seen.
+    // Nudged down from +0.062, where the wordmark ran into the card's own top
+    // edge and the first and last letters were clipped.
+    const plateY = GPU_Y + 0.052;
+    // The backplate and face plates are solid boxes that reach past the body:
+    // the glass-side face plate spans 0.11 to 0.126, so a label at 0.1245 was
+    // *inside* it and never showed. Both copies are pushed clear of that metal.
+    [centerX - depth / 2 - 0.014, centerX + depth / 2 + 0.017].forEach((plateX) => {
+      const plate = new THREE.Mesh(plateGeo, plateMat);
+      // A quarter turn about Y points the plate at the glass, with its width
+      // still running along the card's length.
+      plate.rotation.y = Math.PI / 2;
+      plate.position.set(plateX, plateY, plateZ);
+      partsGroup.add(plate);
+    });
 
     // Anti-sag support: short, and it stops on the top of the PSU shroud, so
     // it never reads as a tall bar floating through the case or piercing it.

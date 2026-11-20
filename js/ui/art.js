@@ -146,16 +146,18 @@ function motherboardArt(accent) {
   `;
 }
 
-function gpuArt(accent) {
+function gpuArt(accent, item) {
+  const name = String(item?.name || '');
+  const fanCount = /4090|4080|5090|5080|3090|3080|7900|4070|7800|7700/i.test(name) ? 3 : 2;
+  const step = 252 / fanCount;
+  const fans = Array.from({ length: fanCount }, (_, index) => fanFace(34 + step * (index + 0.5), 106, fanCount >= 3 ? 27 : 32, accent)).join('');
   return `
     <g>
       <rect x="34" y="64" width="252" height="84" rx="9" fill="url(#metal)" stroke="rgba(255,255,255,0.12)"/>
       <rect x="34" y="64" width="252" height="18" rx="9" fill="${shade(accent, -0.45)}" opacity="0.7"/>
       <rect x="42" y="72" width="80" height="4" rx="2" fill="${accent}" opacity="0.9"/>
       <rect x="34" y="132" width="252" height="16" rx="7" fill="#0b0f18" opacity="0.75"/>
-      ${fanFace(88, 106, 27, accent)}
-      ${fanFace(160, 106, 27, accent)}
-      ${fanFace(232, 106, 27, accent)}
+      ${fans}
       <rect x="286" y="88" width="16" height="38" rx="3" fill="#181f2e" stroke="rgba(255,255,255,0.15)"/>
       <path d="M290 94h8M290 100h8M290 106h8M290 112h8M290 118h8" stroke="rgba(255,255,255,0.2)"/>
       <rect x="64" y="88" width="48" height="5" rx="2" fill="#0c111c" opacity="0.8"/>
@@ -166,8 +168,10 @@ function gpuArt(accent) {
   `;
 }
 
-function ramArt(accent, rgb) {
-  const sticks = [104, 150, 196].map((x, index) => {
+function ramArt(accent, rgb, item) {
+  const count = Math.max(1, Math.min(4, Number(item?.specs?.modules) || 2));
+  const xs = count === 1 ? [140] : count === 2 ? [96, 184] : count === 3 ? [92, 140, 188] : [84, 124, 164, 204];
+  const sticks = xs.map((x, index) => {
     const top = rgb ? `<rect x="${x + 6}" y="44" width="28" height="5" rx="2.5" fill="${accent}" opacity="${0.65 + index * 0.12}"/>` : `<rect x="${x + 6}" y="44" width="28" height="5" rx="2.5" fill="${shade(accent, 0.1)}" opacity="0.45"/>`;
     return `
       <g transform="translate(0 ${index === 1 ? -4 : 0})">
@@ -478,7 +482,8 @@ function coolerArt(accent, item) {
 }
 
 function fanArt(accent, item) {
-  const radius = 58;
+  const size = Number(item?.specs?.size) || 120;
+  const radius = size >= 140 ? 64 : size >= 120 ? 58 : size >= 90 ? 50 : 44;
   return `
     <g>
       ${fanFace(160, 98, radius, accent, 0.9)}
@@ -513,6 +518,24 @@ function fallbackArt(accent) {
   `;
 }
 
+/** Maker wordmark and model line, printed along the foot of every picture.
+    Without it every card showed only a generic category word, so two cards
+    from different brands looked like the same product. */
+function captionArt(item, accent) {
+  if (!item) return '';
+  const brand = String(item.brand || '').toUpperCase();
+  const raw = String(item.name || '').trim();
+  const model = (brand && raw.toUpperCase().startsWith(brand) ? raw.slice(String(item.brand).length).trim() : raw).toUpperCase();
+  const short = model.length > 32 ? `${model.slice(0, 31)}…` : model;
+  return `
+    <rect x="0" y="183" width="320" height="17" fill="rgba(6,9,16,0.86)"/>
+    <path d="M0 183H320" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="12" y="191.5" width="3" height="3" fill="${accent}"/>
+    <text x="20" y="194.5" font-family="'JetBrains Mono', monospace" font-size="9" letter-spacing="1.7" fill="${accent}" opacity="0.95">${escapeHtml(brand)}</text>
+    <text x="308" y="194.5" text-anchor="end" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" letter-spacing="0.3" fill="rgba(226,236,252,0.74)">${escapeHtml(short)}</text>
+  `;
+}
+
 export function accentFor(item) {
   if (!item) return '#8b5cf6';
   return item.accent || BRAND_COLORS[item.brand] || CATEGORY_COLORS[item.category] || '#8b5cf6';
@@ -527,8 +550,8 @@ export function productArt(item, options = {}) {
   let inner = '';
   if (category === 'cpu') inner = cpuArt(accent);
   else if (category === 'motherboard') inner = motherboardArt(accent);
-  else if (category === 'gpu') inner = gpuArt(accent);
-  else if (category === 'ram') inner = ramArt(accent, Boolean(item?.specs?.rgb));
+  else if (category === 'gpu') inner = gpuArt(accent, item);
+  else if (category === 'ram') inner = ramArt(accent, Boolean(item?.specs?.rgb), item);
   else if (category === 'storage') inner = storageArt(accent, item);
   else if (category === 'psu') inner = psuArt(accent, item);
   else if (category === 'case') inner = caseArt(accent, item, id);
@@ -572,6 +595,7 @@ export function productArt(item, options = {}) {
       <rect width="320" height="200" fill="url(#artgrid${id})"/>
       <ellipse cx="160" cy="104" rx="150" ry="86" fill="url(#artglow${id})"/>
       ${inner}
+      ${captionArt(item, accent)}
     </svg>
   `;
 }

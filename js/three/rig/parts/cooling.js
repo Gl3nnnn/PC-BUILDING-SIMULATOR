@@ -28,6 +28,29 @@ export function buildCoolingModel(kit, build) {
         roughness: 0.18,
       }));
       addBox(partsGroup, 0.024, 0.115, 0.115, cpuX, CPU_Y, CPU_Z, ihsMaterial);
+      // Printed plate on the integrated heat spreader, so the chip reads as an
+      // Intel or AMD part rather than a bare silver square.
+      const cpuDesign = brandStyle(cpu.brand);
+      const cpuPlate = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.088, 0.088),
+        new THREE.MeshStandardMaterial({
+          map: tex(`cpu-plate:${cpuDesign.key}:${cpu.id ?? cpu.name}:${cpuAccent.getHex()}`, () => brandPlate({
+            brand: cpu.brand,
+            title: cpuDesign.mark,
+            sub: (cpu.name || '').replace(/Intel |AMD /g, '').slice(0, 20).toUpperCase(),
+            accent: cpuAccent,
+            design: cpuDesign,
+          })),
+          emissive: 0xffffff,
+          emissiveIntensity: 0.55,
+          roughness: 0.3,
+          metalness: 0.2,
+        }),
+      );
+      cpuPlate.rotation.y = Math.PI / 2;
+      cpuPlate.position.set(cpuX + 0.0125, CPU_Y, CPU_Z);
+      cpuPlate.castShadow = false;
+      partsGroup.add(cpuPlate);
       const cpuGlow = addBox(partsGroup, 0.005, 0.07, 0.07, cpuX + 0.016, CPU_Y, CPU_Z, new THREE.MeshStandardMaterial({
         color: 0x0a0d14,
         emissive: cpuAccent,
@@ -82,29 +105,46 @@ export function buildCoolingModel(kit, build) {
       addRoundedBox(partsGroup, 0.228, 0.01, 0.2, 0.004, towerX, baseY + 0.318, CPU_Z, finMaterial, 'y');
       addRoundedBox(partsGroup, 0.228, 0.006, 0.2, 0.003, towerX, baseY + 0.03, CPU_Z, finMaterial, 'y');
       // Heat pipes rising through the stack.
+      // No brand pattern: on the tower's small side plate the be quiet! dot
+      // pattern printed gold dots through the model line, so the plate read as a
+      // dotted gold smear rather than a label. Drawn finer, too.
+      const coolerPlateTex = tex(`plate:${coolerDesign.key}:${cooler.name}:${coolerAccent.getHex()}`, () => brandPlate({
+        brand: cooler.brand,
+        title: coolerDesign.mark,
+        sub: cooler.name ? cooler.name.slice(0, 24) : 'TOWER COOLER',
+        accent: coolerAccent,
+        design: coolerDesign,
+        pattern: 'none',
+        resolution: 3,
+      }));
       for (let index = 0; index < 4; index += 1) {
         const px = towerX - 0.055 + (index % 2) * 0.11;
         const pz = CPU_Z - 0.045 + Math.floor(index / 2) * 0.09;
         addCylinder(partsGroup, 0.0085, 0.0085, 0.29, px, baseY + 0.155, pz, copperMaterial, 10).castShadow = false;
       }
-      // Brand plate across the top of the tower.
-      const plate = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.16, 0.04),
-        new THREE.MeshStandardMaterial({
-          map: tex(`plate:${coolerDesign.key}:${cooler.name}:${coolerAccent.getHex()}`, () => brandPlate({
-            brand: cooler.brand,
-            title: coolerDesign.mark,
-            sub: cooler.name ? cooler.name.slice(0, 24) : 'TOWER COOLER',
-            accent: coolerAccent,
-            design: coolerDesign,
-          })),
-          roughness: 0.4,
-          metalness: 0.3,
-        }),
-      );
-      plate.position.set(towerX + 0.062, baseY + 0.28, CPU_Z);
-      plate.rotation.y = Math.PI / 2;
-      partsGroup.add(plate);
+      // Brand plate on the glass side of the tower. At towerX + 0.062 it sat
+      // *inside* the 0.225-wide fin stack, so the lettering was hidden behind
+      // the fins; it now clears them on the side the glass can see.
+      const plateMat = new THREE.MeshStandardMaterial({
+        map: coolerPlateTex,
+        // Matched to the power-supply badge, the plate that reads on screen.
+        emissive: 0xffffff,
+        emissiveMap: coolerPlateTex,
+        emissiveIntensity: 0.6,
+        roughness: 0.35,
+        metalness: 0.15,
+        side: THREE.DoubleSide,
+      });
+      plateMat.userData.shared = false;
+      const sidePlate = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.075), plateMat);
+      sidePlate.position.set(towerX + 0.118, baseY + 0.255, CPU_Z);
+      sidePlate.rotation.y = Math.PI / 2;
+      partsGroup.add(sidePlate);
+      // A second copy across the front fin edge: the front view looks straight
+      // at that face, and the side plate is edge-on there.
+      const frontPlate = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.07), plateMat);
+      frontPlate.position.set(towerX, baseY + 0.255, CPU_Z + 0.101);
+      partsGroup.add(frontPlate);
       // The blade face points at the glass. Flipped the other way the fan's
       // solid backing disc faced out and read as a dark plate bolted to the
       // side of the fin stack. Kept on the rear side of the tower so it never
@@ -149,8 +189,16 @@ export function buildCoolingModel(kit, build) {
           design: aioDesign,
           label: aioDesign.mark,
         })),
+        emissive: 0xffffff,
+        emissiveMap: tex(`aio:${aioDesign.key}:${coolerAccent.getHex()}`, () => brandHub({
+          brand: cooler.brand,
+          accent: coolerAccent,
+          design: aioDesign,
+          label: aioDesign.mark,
+        })),
+        emissiveIntensity: 0.55,
         roughness: 0.4,
-        metalness: 0.25,
+        metalness: 0.2,
       }),
     );
     pumpLogo.rotation.y = Math.PI / 2;

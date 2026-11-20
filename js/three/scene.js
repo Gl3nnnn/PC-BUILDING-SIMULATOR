@@ -216,9 +216,17 @@ export function createPCScene(container, options = {}) {
   rimLight.position.set(-3.4, 1.6, -2.6);
   scene.add(rimLight);
 
-  const interiorLight = new THREE.PointLight(0xe8f1ff, 2.9, 4.5, 1.7);
+  // Brighter and wider than the old 2.9: the plates and labels sit deep inside
+  // the case, so anything dimmer left the printed text as a grey smudge.
+  const interiorLight = new THREE.PointLight(0xe8f1ff, 4.6, 5.2, 1.6);
   interiorLight.position.set(0.24, 0.34, 0.2);
   scene.add(interiorLight);
+  // A second light just inside the side glass, aimed back at the parts, so the
+  // faces pointing at the window (card backplate, cooler, drive labels) are lit
+  // rather than sitting in shadow behind the tinted panel.
+  const panelFill = new THREE.PointLight(0xdfefff, 1.9, 3.2, 1.7);
+  panelFill.position.set(0.34, 0.12, 0.1);
+  scene.add(panelFill);
   const lowerFill = new THREE.PointLight(0x9dbbff, 1.35, 3.4, 1.9);
   lowerFill.position.set(0.3, -0.3, 0.32);
   scene.add(lowerFill);

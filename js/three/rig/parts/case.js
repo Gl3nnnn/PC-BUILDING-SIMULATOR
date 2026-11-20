@@ -84,11 +84,14 @@ export function buildCaseModel(kit, pcCase) {
     // The side the camera can swing behind is smoked glass, not a solid wall:
     // an opaque panel turned the whole rig into an unreadable black block.
     const smokedMaterial = mat('case-smoked', () => new THREE.MeshPhysicalMaterial({
-      color: 0x0f1520,
+      // Lifted from a near-black 0x0f1520 at 0.16: the smudge of tint was
+      // killing the contrast of everything behind it, so the printed plates
+      // read as dark rectangles instead of labels.
+      color: 0x2a3a50,
       metalness: 0.1,
       roughness: 0.06,
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.1,
       side: THREE.DoubleSide,
       depthWrite: false,
       clearcoat: 1,
@@ -261,10 +264,9 @@ export function buildCaseModel(kit, pcCase) {
     // Accent light strips sit just inside the frame. They used to float a few
     // millimetres outside the mesh and the glass, which read as glowing bars
     // hanging off the case from any angle.
-    // Both strips are kept short and low: running the full height they glowed
-    // over the wood slats and across the roof, so the top view showed two stray
-    // neon bars instead of a clean front.
-    const frontStrip = addBox(caseGroup, 0.011, CASE_H - 0.64, 0.01, CASE_W / 2 - 0.042, -0.1, CASE_D / 2 - 0.005, accentMaterial);
+    // A short run near the feet only. Running it most of the case height drew a
+    // long green neon line down the glass edge on every build.
+    const frontStrip = addBox(caseGroup, 0.011, 0.3, 0.01, CASE_W / 2 - 0.042, -CASE_H / 2 + 0.22, CASE_D / 2 - 0.005, accentMaterial);
     frontStrip.castShadow = false;
     // The roof bar is gone. Seen from above it cut a bright neon line straight
     // across the top of the case, which read as a stray glowing stick rather
@@ -285,19 +287,26 @@ export function buildCaseModel(kit, pcCase) {
 
     // Maker badge on the front panel, in the brand's own plate style.
     if (pcCase) {
+      // A banner plate: the square texture squeezed onto this 4:1 badge turned
+      // the maker mark into a pale smear on every case.
+      const badgeTex = tex(`case-badge:${design.key}:${accent.getHex()}:${pcCase.id}`, () => brandPlate({
+        brand: pcCase.brand,
+        title: design.mark,
+        sub: (specs.size || 'CASE').toUpperCase(),
+        accent,
+        design,
+        pattern: 'none',
+        resolution: 3,
+      }));
       const badge = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.12, 0.028),
+        new THREE.PlaneGeometry(0.16, 0.04),
         new THREE.MeshStandardMaterial({
-          map: tex(`case-badge:${design.key}:${accent.getHex()}:${pcCase.id}`, () => brandPlate({
-            brand: pcCase.brand,
-            title: design.mark,
-            sub: (specs.size || 'CASE').toUpperCase(),
-            accent,
-            design,
-          })),
+          map: badgeTex,
+          emissive: 0xffffff,
+          emissiveMap: badgeTex,
+          emissiveIntensity: 0.5,
           roughness: 0.4,
-          metalness: 0.32,
-          transparent: true,
+          metalness: 0.2,
         }),
       );
       badge.position.set(-CASE_W / 2 + 0.14, -CASE_H / 2 + 0.038, CASE_D / 2 + 0.008);

@@ -1,4 +1,5 @@
 import { attachPhysicalSpecs } from './component-specs.js';
+import { EXTRA_HARDWARE } from './hardware-more.js';
 
 export const CATEGORIES = [
   { id: 'cpu', label: 'CPU', singular: 'Processor', required: true, multi: false, icon: 'cpu', blurb: 'Intel & AMD processors' },
@@ -601,6 +602,9 @@ export const HARDWARE = [
     specs: { type: 'USB header', length: 300, gauge: '28 AWG', connectorA: 'USB 2.0 9-pin', connectorB: 'USB 2.0 9-pin', rating: '480 Mbps', sleeved: true },
   },
 ];
+
+// The rest of the catalogue lives in its own module so this list stays readable.
+HARDWARE.push(...EXTRA_HARDWARE);
 
 // Every item carries real dimensions, power draw, weight and a visual asset marker.
 attachPhysicalSpecs(HARDWARE);

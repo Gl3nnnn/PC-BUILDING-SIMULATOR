@@ -326,7 +326,9 @@
 .compare-toggle {
   position: absolute;
   right: 9px;
-  bottom: 9px;
+  /* Sits above the printed brand/model strip at the foot of the art, which
+     the button used to cover. */
+  bottom: 26px;
   z-index: 2;
   display: inline-flex;
   align-items: center;

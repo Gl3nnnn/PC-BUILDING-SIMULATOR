@@ -1,4 +1,4 @@
-﻿const VERSION = 'pcbs-v2.2.0';
+const VERSION = 'pcbs-v2.10.0';
 
 // The whole app is static, so the cache list is explicit. Every entry is a
 // path relative to this file, which keeps it correct when the site is served
@@ -51,6 +51,7 @@ const CORE = [
   './js/core/thermal.js',
   './js/data/component-specs.js',
   './js/data/hardware.js',
+  './js/data/hardware-more.js',
   './js/data/jobs.js',
   './js/data/lessons.js',
   './js/data/presets.js',

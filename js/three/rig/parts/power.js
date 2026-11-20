@@ -56,19 +56,28 @@ export function buildPowerModel(kit, build) {
       // PSU, so it never reads as a black box floating in the middle of the rig.
       const psuY = shroudTop - 0.085;
       addRoundedBox(partsGroup, 0.4, 0.095, 0.29, 0.008, BOARD_X + 0.26, psuY, -0.16, psuMaterial, 'z');
-      // Badge plate on the shroud's side, facing the window.
+      // Badge plate on the shroud's side, facing the window. Widened from
+      // 0.15 by 0.045, where the maker wordmark was too small to read.
+      // The brand's dot pattern printed straight through the lettering, and the
+      // 512px plate blurred into a smudge at this size: no pattern, drawn finer.
+      const badgeTex = tex(`badge-psu:${design.key}:${psu.id ?? psu.brand}:${accent.getHex()}`, () => brandPlate({
+        brand: psu.brand,
+        title: design.mark,
+        sub: `${psu.specs.wattage || ''}W ${psu.specs.efficiency || ''}`.trim(),
+        accent,
+        design,
+        pattern: 'none',
+        resolution: 3,
+      }));
       const badge = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.15, 0.045),
+        new THREE.PlaneGeometry(0.225, 0.056),
         new THREE.MeshStandardMaterial({
-          map: tex(`badge-psu:${design.key}:${psu.id ?? psu.brand}:${accent.getHex()}`, () => brandPlate({
-            brand: psu.brand,
-            title: design.mark,
-            sub: `${psu.specs.wattage || ''}W ${psu.specs.efficiency || ''}`.trim(),
-            accent,
-            design,
-          })),
+          map: badgeTex,
+          emissive: 0xffffff,
+          emissiveMap: badgeTex,
+          emissiveIntensity: 0.6,
           roughness: 0.42,
-          metalness: 0.3,
+          metalness: 0.12,
         }),
       );
       badge.rotation.y = Math.PI / 2;
@@ -128,18 +137,24 @@ export function buildPowerModel(kit, build) {
         metalness: 0.6,
         roughness: 0.34,
       }))).castShadow = false;
+      const labelTex = tex(`plate-drive:${driveDesign.key}:${drive.id ?? drive.brand}`, () => brandPlate({
+        brand: drive.brand,
+        title: driveDesign.mark,
+        sub: `${drive.specs.interface || ''} ${drive.specs.capacityGB || ''}GB`.trim(),
+        accent: color,
+        design: driveDesign,
+        pattern: 'none',
+        resolution: 3,
+      }));
       const label = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.07, 0.02),
+        new THREE.PlaneGeometry(0.15, 0.042),
         new THREE.MeshStandardMaterial({
-          map: tex(`plate-drive:${driveDesign.key}:${drive.id ?? drive.brand}`, () => brandPlate({
-            brand: drive.brand,
-            title: driveDesign.mark,
-            sub: `${drive.specs.interface || ''} ${drive.specs.capacityGB || ''}GB`.trim(),
-            accent: color,
-            design: driveDesign,
-          })),
+          map: labelTex,
+          emissive: 0xffffff,
+          emissiveMap: labelTex,
+          emissiveIntensity: 0.5,
           roughness: 0.45,
-          metalness: 0.25,
+          metalness: 0.2,
         }),
       );
       label.rotation.x = -Math.PI / 2;

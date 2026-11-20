@@ -11,7 +11,7 @@ import { getItems } from '../../../core/build.js';
 export function buildMotherboardModel(kit, build) {
   const {
     accentOf, addBox, addInstances, addRoundedBox, addScrew, BOARD_D, BOARD_FRONT_Z, BOARD_H,
-    BOARD_REAR_Z, BOARD_X, BOARD_Y, brandLogo, brandStyle, createPcbTexture, DIMM_PITCH,
+    BOARD_REAR_Z, BOARD_X, BOARD_Y, brandPlate, brandStyle, createPcbTexture, DIMM_PITCH,
     DIMM_Z0, getItems, mat, partsGroup, tex, THREE
   } = kit;
 
@@ -81,20 +81,31 @@ export function buildMotherboardModel(kit, build) {
     addInstances(partsGroup, new THREE.BoxGeometry(0.006, 0.075, 0.01), darkMetal, chipFins);
     addBox(partsGroup, 0.008, 0.028, 0.1, BOARD_X + 0.044, -0.13, 0.055, trimMaterial).castShadow = false;
 
-    // Maker logo printed on the chipset heatsink: the board's calling card.
+    // Printed plate on the chipset heatsink: the board's calling card. A printed
+    // plate rather than a bare logo, so the maker and chipset both read through
+    // the glass — at 0.115 by 0.052 the wordmark was unreadable.
     if (board) {
       const logo = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.115, 0.052),
+        new THREE.PlaneGeometry(0.17, 0.075),
         new THREE.MeshStandardMaterial({
-          map: tex(`mb-logo:${design.key}:${board.id ?? board.brand}:${accent.getHex()}`, () => brandLogo({
+          map: tex(`mb-plate:${design.key}:${board.id ?? board.brand}:${accent.getHex()}`, () => brandPlate({
             brand: board.brand,
+            title: design.mark,
+            sub: `${board.specs?.chipset || ''} ${board.specs?.formFactor || ''}`.trim().toUpperCase(),
             accent,
             design,
-            text: design.mark,
           })),
-          roughness: 0.35,
-          metalness: 0.4,
-          transparent: true,
+          emissive: 0xffffff,
+          emissiveMap: tex(`mb-plate:${design.key}:${board.id ?? board.brand}:${accent.getHex()}`, () => brandPlate({
+            brand: board.brand,
+            title: design.mark,
+            sub: `${board.specs?.chipset || ''} ${board.specs?.formFactor || ''}`.trim().toUpperCase(),
+            accent,
+            design,
+          })),
+          emissiveIntensity: 0.6,
+          roughness: 0.4,
+          metalness: 0.2,
         }),
       );
       logo.rotation.y = Math.PI / 2;
